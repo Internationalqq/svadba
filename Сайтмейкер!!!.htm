@@ -28,7 +28,7 @@
     <link rel="stylesheet" href="./Сайтмейкер!!!_files/font-awesome.min.css">
     <link rel="stylesheet" href="./Сайтмейкер!!!_files/fancybox.min.css">
     <link rel="stylesheet" href="./Сайтмейкер!!!_files/constructor.min.css">
-    <link rel="stylesheet" href="./Сайтмейкер!!!_files/local-fonts.css?v=1770888992">
+    <link rel="stylesheet" href="./Сайтмейкер!!!_files/local-fonts.css?v=1770889944">
     
     <style>
         .ct-shadow .ct-color-wrapper:first-child:before, .personal_colors .ct-color-wrapper:before {
@@ -286,7 +286,9 @@ body * {
 /* РўР°Р№РјРёРЅРі - РІСЃРµ СЌР»РµРјРµРЅС‚С‹ */
 .sm-timing__item__text,
 .sm-timing__item,
-.sm-timing * {
+.sm-timing *,
+p[data-sm-text*="TIMING"],
+[data-sm-text*="TIMING"] {
     font-family: PIPSRegular, "SMHeadersFont", sans-serif !important;
 }
 </style></head>
@@ -2971,4 +2973,18 @@ body * {
     setTimeout(applyTimingFont, 1000);
     setTimeout(applyTimingFont, 2000);
 })();
-</script></body></html>
+</script>
+<style id="ultra-timing-override">
+/* РЈР›Р¬РўР Рђ-РЎРџР•Р¦РР¤РР§РќРћР• РџР РђР’РР›Рћ Р”Р›РЇ РўРђР™РњРРќР“Рђ - Р—РђР“Р РЈР–РђР•РўРЎРЇ РџРћРЎР›Р•Р”РќРРњ */
+p[data-sm-text*="TIMING"],
+div[data-sm-text*="TIMING"],
+span[data-sm-text*="TIMING"],
+.sm-timing p[data-sm-text*="TIMING"],
+.sm-timing div[data-sm-text*="TIMING"],
+.sm-timing span[data-sm-text*="TIMING"],
+.sm-page .sm-timing p[data-sm-text*="TIMING"],
+.sm-page .sm-timing div[data-sm-text*="TIMING"],
+.sm-page .sm-timing span[data-sm-text*="TIMING"] {
+    font-family: PIPSRegular, "SMHeadersFont", sans-serif !important;
+}
+</style></body></html>

@@ -45,6 +45,9 @@ h1, h2, h3, h4, h5, h6,
 
 /* РўР°Р№РјС–РЅРі - РѕРїРёСЃ РїРѕРґС–Р№ */
 .sm-timing__item__text,
+p[data-sm-text*="TIMING"],
+div[data-sm-text*="TIMING"],
+span[data-sm-text*="TIMING"],
 [data-sm-text*="TIMING"] {
   font-family: "SMHeadersFont", sans-serif !important;
 }
