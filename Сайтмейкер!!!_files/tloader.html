@@ -56,7 +56,56 @@
         var language = 'ru';
 
     </script>
-</head>
+
+<style id="modal-z-index-fix">
+/* РЈР›Р¬РўР Рђ-Р’Р«РЎРћРљРР™ Z-INDEX Р”Р›РЇ РњРћР”РђР›Р¬РќРћР“Рћ РћРљРќРђ - Р’Р«РЁР• Р’РЎР•РҐ */
+.sm-modal.sm-open,
+.sm-questionnaire.sm-open,
+.sm-thanks.sm-open {
+    z-index: 9999999 !important;
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    bottom: 0 !important;
+    width: 100% !important;
+    height: 100% !important;
+    overflow-y: auto !important;
+    background: rgba(249, 245, 242, 0.98) !important;
+}
+
+.sm-modal.sm-open .sm-container,
+.sm-questionnaire.sm-open .sm-container,
+.sm-thanks.sm-open .sm-container {
+    position: relative !important;
+    z-index: 9999999 !important;
+}
+
+.sm-modal-close,
+.sm-quest-modal-close {
+    z-index: 10000000 !important;
+    position: fixed !important;
+}
+
+/* Р”Р›РЇ Р’РЎР•РҐ Р РђР—РњР•Р РћР’ Р­РљР РђРќРђ */
+@media (max-width: 500px) {
+    .sm-modal.sm-open,
+    .sm-questionnaire.sm-open,
+    .sm-thanks.sm-open {
+        z-index: 9999999 !important;
+        position: fixed !important;
+    }
+}
+
+@media (min-width: 501px) {
+    .sm-modal.sm-open,
+    .sm-questionnaire.sm-open,
+    .sm-thanks.sm-open {
+        z-index: 9999999 !important;
+        position: fixed !important;
+    }
+}
+</style></head>
 
 <body class="sm-template112 sm-color0 sm-scroll_type-1 sm-scroll_speed-1 sm-hfont-0" data-project-id="146394"
     data-lang="ru">

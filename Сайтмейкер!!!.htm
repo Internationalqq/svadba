@@ -11675,6 +11675,18 @@
             font-family: PIPSRegular, "SMHeadersFont", sans-serif !important;
         }
     </style>
-</body>
+
+<style id="modal-z-index-fix">
+/* РЈР›Р¬РўР Рђ-Р’Р«РЎРћРљРР™ Z-INDEX Р”Р›РЇ РњРћР”РђР›Р¬РќРћР“Рћ РћРљРќРђ */
+.sm-modal.sm-open,
+.sm-questionnaire.sm-open,
+.sm-thanks.sm-open {
+    z-index: 99999 !important;
+}
+.sm-modal-close,
+.sm-quest-modal-close {
+    z-index: 100000 !important;
+}
+</style></body>
 
 </html>
