@@ -1,0 +1,69 @@
+/* ====== ЛОКАЛЬНЫЕ ШРИФТЫ И ФОН ДЛЯ КОПИИ САЙТА ====== */
+
+/* Заголовочный шрифт — PIPSRegular (SMHeadersFont) */
+@font-face {
+  font-family: "SMHeadersFont";
+  src: url("./fonts/PIPSRegular.woff2") format("woff2");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* Текстовый шрифт — Montserrat Alternates (обычный) */
+@font-face {
+  font-family: "SMTextsFont";
+  src: url("./fonts/MontserratAlternates-Regular.woff2") format("woff2");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* Текстовый шрифт — Montserrat Alternates (light) */
+@font-face {
+  font-family: "SMTextsFont";
+  src: url("./fonts/MontserratAlternates-Light.woff2") format("woff2");
+  font-weight: 300;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* БАЗОВЫЙ ТЕКСТ: Montserrat Alternates */
+html, body, .sm-page, .sm-page * {
+  font-family: "SMTextsFont", system-ui, -apple-system, BlinkMacSystemFont, sans-serif !important;
+}
+
+/* ВЕРХНИЕ НАДПИСИ (Никита, Арина): как на оригинале — text-font-family (Montserrat) */
+.sm-main_groom-name,
+.sm-main_bride-name,
+.sm-shared__title {
+  font-family: var(--text-font-family) !important;
+}
+
+/* ЗАГОЛОВКИ И КРАСИВЫЕ НАДПИСИ: PIPSRegular */
+h1, h2, h3, h4, h5, h6,
+.sm-title,
+.sm-main_save,
+.sm-main__names,
+.sm-cormorantRegular-100-50,
+.sm-cormorantRegular-70-40,
+.sm-cormorantRegular-70-30,
+.sm-cormorantLight-30-20px,
+.sm-cormorantLight-40-30,
+.sm-cormorantRegular-100-30 {
+  font-family: "SMHeadersFont", "SMTextsFont", serif !important;
+}
+
+/* ФОН САЙТА (шаблон 89) */
+body {
+  background: url("./fon-89.webp") center top / cover no-repeat fixed;
+}
+
+/* Декор секции «История» — чтобы картинка грузилась локально поверх шаблона */
+.sm-history__img::before {
+  background: url("./history-decor.webp") 0 0 / 100% auto no-repeat !important;
+}
+
+/* Декор секции «Пожелания» — чтобы картинка грузилась локально поверх шаблона */
+.sm-wishes::before {
+  background: url("./wishes-decor.webp") 0 0 / 100% auto no-repeat !important;
+}
