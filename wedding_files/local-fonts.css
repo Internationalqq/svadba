@@ -1,0 +1,68 @@
+﻿/* ====== Р›РѕРєР°Р»СЊРЅС‹Рµ С€СЂРёС„С‚С‹ С– С„РѕРЅ РґР»СЏ С†СЊРѕРіРѕ СЃР°Р№С‚Сѓ ====== */
+
+/* Р—Р°РіРѕР»РѕРІРѕС‡РЅС‹Р№ С€СЂРёС„С‚ - PIPSRegular (SMHeadersFont) */
+@font-face {
+  font-family: "SMHeadersFont";
+  src: url("./fonts/PIPSRegular.woff2") format("woff2");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* РўРµРєСЃС‚РѕРІРёР№ С€СЂРёС„С‚ - РўРћР–Р• PIPSRegular (Р·РјС–РЅРµРЅРѕ) */
+@font-face {
+  font-family: "SMTextsFont";
+  src: url("./fonts/PIPSRegular.woff2") format("woff2");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* Р“Р»РѕР±Р°Р»СЊРЅС‹Р№ С€СЂРёС„С‚: PIPSRegular РґР»СЏ РІСЃС–С… */
+html, body, .sm-page, .sm-page * {
+  font-family: "SMHeadersFont", system-ui, -apple-system, BlinkMacSystemFont, sans-serif !important;
+}
+
+/* Р†РјРµРЅР° РјРѕР»РѕРґРёС… (РќС–РєС–С‚Р°, РђСЂС–РЅР°) */
+.sm-main_groom-name,
+.sm-main_bride-name,
+.sm-shared__title {
+  font-family: "SMHeadersFont", sans-serif !important;
+}
+
+/* Р—Р°РіРѕР»РѕРІРєРё С– РѕСЃРЅРѕРІРЅС– РµР»РµРјРµРЅС‚Рё */
+h1, h2, h3, h4, h5, h6,
+.sm-title,
+.sm-main_save,
+.sm-main__names,
+.sm-text,
+.sm-history__text,
+.sm-wishes__content-slide,
+.sm-contact__info,
+.sm-form__input {
+  font-family: "SMHeadersFont", "SMTextsFont", serif !important;
+}
+
+/* РўР°Р№РјС–РЅРі - РѕРїРёСЃ РїРѕРґС–Р№ */
+.sm-timing__item__text,
+p[data-sm-text*="TIMING"],
+div[data-sm-text*="TIMING"],
+span[data-sm-text*="TIMING"],
+[data-sm-text*="TIMING"] {
+  font-family: "SMHeadersFont", sans-serif !important;
+}
+
+/* Р¤РћРќ РЎРђР™РўРЈ (С€Р°Р±Р»РѕРЅ 89) */
+body {
+  background: url("./fon-89.webp") center top / cover no-repeat fixed;
+}
+
+/* Р”РµРєРѕСЂ СЃРµРєС†С–С— <Р†РЎРўРћР Р†РЇ> */
+.sm-history__img::before {
+  background: url("./history-decor.webp") 0 0 / 100% auto no-repeat !important;
+}
+
+/* Р”РµРєРѕСЂ СЃРµРєС†С–С— <РџРћР‘РђР–РђРќРќРЇ> */
+.sm-wishes::before {
+  background: url("./wishes-decor.webp") 0 0 / 100% auto no-repeat !important;
+}
