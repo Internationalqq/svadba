@@ -14,7 +14,7 @@ import os
 import csv
 import io
 
-PORT = 8000
+PORT = int(os.environ.get('PORT', 8000))
 
 class WeddingHandler(http.server.SimpleHTTPRequestHandler):
     
