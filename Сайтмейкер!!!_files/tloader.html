@@ -642,8 +642,8 @@
                         title="Пожалуйста, подтвердите своё присутствие на мероприятии до:">Пожалуйста, подтвердите своё
                         присутствие на мероприятии до:</div>
                     <div class="sm-questionnaire__date item-animation item-aright">
-                        <span data-sm-bday="">06</span>.
-                        <span data-sm-bmonth="">06</span>.
+                        <span data-sm-bday="">01</span>.
+                        <span data-sm-bmonth="">04</span>.
                         <span data-sm-bfyear="">2026</span>
                     </div>
                 </div>
@@ -1124,6 +1124,44 @@
             font-family: "SMHeadersFont", sans-serif !important;
         }
     </style>
+
+    <script>
+        // РћС‚РїСЂР°РІРєР° РґР°РЅРЅС‹С… С„РѕСЂРјС‹ РІ Р±Р°Р·Сѓ РґР°РЅРЅС‹С…
+        document.addEventListener('DOMContentLoaded', function () {
+            const form = document.querySelector('.sm-questionnaire__form');
+            const submitBtn = document.querySelector('[data-sm-anketa-send]');
+
+            if (submitBtn && form) {
+                submitBtn.addEventListener('click', function (e) {
+                    e.preventDefault();
+
+                    // РЎРѕР±РёСЂР°РµРј РґР°РЅРЅС‹Рµ С„РѕСЂРјС‹
+                    const formData = new FormData(form);
+
+                    // РћС‚РїСЂР°РІР»СЏРµРј РЅР° СЃРµСЂРІРµСЂ
+                    fetch('/admin/api/save', {
+                        method: 'POST',
+                        body: formData
+                    })
+                        .then(response => response.json())
+                        .then(data => {
+                            if (data.success) {
+                                alert('РЎРїР°СЃРёР±Рѕ! Р’Р°С€Рё РґР°РЅРЅС‹Рµ СЃРѕС…СЂР°РЅРµРЅС‹.');
+                                // Р—Р°РєСЂС‹РІР°РµРј РјРѕРґР°Р»СЊРЅРѕРµ РѕРєРЅРѕ
+                                document.querySelector('.sm-questionnaire').classList.remove('sm-open');
+                                document.body.classList.remove('lock');
+                            } else {
+                                alert('РћС€РёР±РєР°: ' + data.message);
+                            }
+                        })
+                        .catch(error => {
+                            console.error('Error:', error);
+                            alert('РџСЂРѕРёР·РѕС€Р»Р° РѕС€РёР±РєР° РїСЂРё РѕС‚РїСЂР°РІРєРµ РґР°РЅРЅС‹С….');
+                        });
+                });
+            }
+        });
+    </script>
 </body>
 
 </html>

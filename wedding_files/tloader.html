@@ -1123,6 +1123,40 @@
         .sm-form__block__title {
             font-family: "SMHeadersFont", sans-serif !important;
         }
+
+        /* Кружок date-active.svg поверх даты 6 в календаре */
+        .sm-datetime {
+            --date-active: url("./img/date-active.svg");
+        }
+        .sm-calendar .sm-number-active {
+            position: relative;
+            z-index: 2;
+        }
+        .sm-calendar .sm-number-active::before {
+            content: "";
+            position: absolute;
+            left: 50%;
+            top: 50%;
+            transform: translate(-50%, -50%);
+            width: 83px;
+            height: 73px;
+            mask: var(--date-active);
+            -webkit-mask: var(--date-active);
+            mask-size: 100% auto;
+            -webkit-mask-size: 100% auto;
+            mask-repeat: no-repeat;
+            -webkit-mask-repeat: no-repeat;
+            mask-position: center;
+            -webkit-mask-position: center;
+            background: #f21430;
+            z-index: -1;
+        }
+        @media (max-width: 500px) {
+            .sm-calendar .sm-number-active::before {
+                width: 42px;
+                height: 40px;
+            }
+        }
     </style>
 
     <style>
