@@ -13,7 +13,12 @@ Render пытается использовать Node.js вместо Python, и
 
 **Build Command:**
 ```
-pip install -r requirements.txt
+python3 -m pip install --upgrade pip && python3 -m pip install -r requirements.txt
+```
+
+**ИЛИ попробуйте:**
+```
+pip3 install --upgrade pip && pip3 install -r requirements.txt
 ```
 
 **Start Command:**
