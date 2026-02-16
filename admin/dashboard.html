@@ -63,6 +63,55 @@
             font-size: 42px;
             font-weight: bold;
         }
+        /* Компактный вертикальный блок для алкоголя */
+        #drinks-stats {
+            display: block;
+            margin-top: 15px;
+            max-width: 400px;
+        }
+        #drinks-stats .stat-card {
+            padding: 12px 15px;
+            border-radius: 10px;
+            background: white;
+            border: 1px solid #e2e8f0;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        #drinks-stats .drink-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 6px 10px;
+            border-radius: 6px;
+            font-size: 13px;
+        }
+        #drinks-stats .drink-item h4 {
+            font-size: 12px;
+            font-weight: 500;
+            margin: 0;
+            color: white;
+        }
+        #drinks-stats .drink-item .number {
+            font-size: 18px;
+            font-weight: bold;
+            color: white;
+        }
+        #drinks-stats .drink-item:nth-child(1) {
+            background: linear-gradient(135deg, #f6ad55 0%, #ed8936 100%);
+        }
+        #drinks-stats .drink-item:nth-child(2) {
+            background: linear-gradient(135deg, #fc8181 0%, #f56565 100%);
+        }
+        #drinks-stats .drink-item:nth-child(3) {
+            background: linear-gradient(135deg, #d69e2e 0%, #b7791f 100%);
+        }
+        #drinks-stats .drink-item:nth-child(4) {
+            background: linear-gradient(135deg, #9f7aea 0%, #805ad5 100%);
+        }
+        #drinks-stats .drink-item:nth-child(5) {
+            background: linear-gradient(135deg, #68d391 0%, #48bb78 100%);
+        }
         .stat-card:nth-child(2) {
             background: linear-gradient(135deg, #48bb78 0%, #38a169 100%);
             box-shadow: 0 4px 15px rgba(72, 187, 120, 0.4);
@@ -214,6 +263,31 @@
             </div>
         </div>
         
+        <div id="drinks-stats">
+            <div class="stat-card">
+                <div class="drink-item">
+                    <h4>Белое вино</h4>
+                    <span class="number" id="stat-drink-white">0</span>
+                </div>
+                <div class="drink-item">
+                    <h4>Красное вино</h4>
+                    <span class="number" id="stat-drink-red">0</span>
+                </div>
+                <div class="drink-item">
+                    <h4>Виски</h4>
+                    <span class="number" id="stat-drink-whiskey">0</span>
+                </div>
+                <div class="drink-item">
+                    <h4>Водка</h4>
+                    <span class="number" id="stat-drink-vodka">0</span>
+                </div>
+                <div class="drink-item">
+                    <h4>Не пью алкоголь</h4>
+                    <span class="number" id="stat-drink-none">0</span>
+                </div>
+            </div>
+        </div>
+        
         <div class="actions">
             <a href="/admin/api/export" class="btn btn-success" download>📥 Скачать Excel</a>
             <button onclick="loadData()" class="btn">🔄 Обновить</button>
@@ -230,9 +304,11 @@
                         <tr>
                             <th>ID</th>
                             <th>Имя</th>
+                            <th>Второй гость</th>
                             <th>Придет?</th>
                             <th>Автобус</th>
-                            <th>Напитки</th>
+                            <th>Напитки (гость)</th>
+                            <th>Напитки (2-й гость)</th>
                             <th>Дата ответа</th>
                             <th>Действия</th>
                         </tr>
@@ -253,8 +329,19 @@
     <script>
         async function loadData() {
             try {
-                // Загружаем статистику
-                const statsResponse = await fetch('/admin/api/stats');
+                // Загружаем статистику с таймаутом
+                const statsController = new AbortController();
+                const statsTimeout = setTimeout(() => statsController.abort(), 10000); // 10 секунд
+                
+                const statsResponse = await fetch('/admin/api/stats', {
+                    signal: statsController.signal
+                });
+                clearTimeout(statsTimeout);
+                
+                if (!statsResponse.ok) {
+                    const errorText = await statsResponse.text();
+                    throw new Error(`HTTP ${statsResponse.status}: ${errorText}`);
+                }
                 const stats = await statsResponse.json();
                 
                 document.getElementById('stat-total').textContent = stats.total;
@@ -262,9 +349,46 @@
                 document.getElementById('stat-not-coming').textContent = stats.not_coming;
                 document.getElementById('stat-bus').textContent = stats.bus_users;
                 
-                // Загружаем ответы
-                const responsesResponse = await fetch('/admin/api/responses');
-                const responses = await responsesResponse.json();
+                // Статистика по алкоголю
+                if (stats.drinks_stats) {
+                    document.getElementById('stat-drink-white').textContent = stats.drinks_stats['Белое вино'] || 0;
+                    document.getElementById('stat-drink-red').textContent = stats.drinks_stats['Красное вино'] || 0;
+                    document.getElementById('stat-drink-whiskey').textContent = stats.drinks_stats['Виски'] || 0;
+                    document.getElementById('stat-drink-vodka').textContent = stats.drinks_stats['Водка'] || 0;
+                    document.getElementById('stat-drink-none').textContent = stats.drinks_stats['Не пью алкоголь'] || 0;
+                }
+                
+                // Загружаем ответы с таймаутом
+                const responsesController = new AbortController();
+                const responsesTimeout = setTimeout(() => responsesController.abort(), 10000); // 10 секунд
+                
+                const responsesResponse = await fetch('/admin/api/responses', {
+                    signal: responsesController.signal
+                });
+                clearTimeout(responsesTimeout);
+                
+                if (!responsesResponse.ok) {
+                    const errorText = await responsesResponse.text();
+                    throw new Error(`HTTP ${responsesResponse.status}: ${errorText}`);
+                }
+                const responsesData = await responsesResponse.json();
+                
+                // Проверяем, что ответ является массивом
+                let responses = [];
+                if (Array.isArray(responsesData)) {
+                    responses = responsesData;
+                    // Логируем для отладки
+                    responses.forEach((row, index) => {
+                        if (row.companion_drinks) {
+                            console.log(`Response ${index}: companion_drinks =`, row.companion_drinks);
+                        }
+                    });
+                } else if (responsesData && responsesData.error) {
+                    throw new Error(responsesData.message || 'Ошибка получения данных');
+                } else {
+                    console.warn('Unexpected response format:', responsesData);
+                    responses = [];
+                }
                 
                 const tbody = document.getElementById('table-body');
                 tbody.innerHTML = '';
@@ -293,12 +417,19 @@
                             minute: '2-digit'
                         });
                         
+                        // Логируем для отладки
+                        if (row.companion_drinks) {
+                            console.log(`Row ${row.id}: companion_drinks =`, row.companion_drinks);
+                        }
+                        
                         tr.innerHTML = `
                             <td><strong>#${row.id}</strong></td>
                             <td><strong>${row.name || '-'}</strong></td>
+                            <td>${row.companion || '-'}</td>
                             <td>${badge}</td>
                             <td>${row.bus_option || '-'}</td>
                             <td>${row.drinks || '-'}</td>
+                            <td>${(row.companion_drinks && row.companion_drinks.trim()) ? row.companion_drinks : '-'}</td>
                             <td>${formattedDate}</td>
                             <td>
                                 <button class="btn-delete" onclick="deleteRecord(${row.id}, '${(row.name || '').replace(/'/g, "\\'")}')" title="Удалить запись">
@@ -316,7 +447,27 @@
                 
             } catch (error) {
                 console.error('Error loading data:', error);
-                document.getElementById('loading').innerHTML = '❌ Ошибка загрузки данных';
+                let errorMessage = error.message || 'Неизвестная ошибка';
+                
+                // Проверяем тип ошибки
+                if (error.name === 'AbortError') {
+                    errorMessage = 'Превышено время ожидания ответа от сервера. Проверьте, что сервер запущен и доступен.';
+                } else if (error.message.includes('Failed to fetch')) {
+                    errorMessage = 'Не удалось подключиться к серверу. Убедитесь, что сервер запущен на порту 8000.';
+                }
+                
+                document.getElementById('loading').innerHTML = `
+                    <div style="color: #f56565; padding: 20px; text-align: center;">
+                        <div style="font-size: 48px; margin-bottom: 10px;">❌</div>
+                        <h3 style="color: #c53030; margin-bottom: 10px;">Ошибка загрузки данных</h3>
+                        <p style="color: #666; margin-bottom: 15px;">${errorMessage}</p>
+                        <button onclick="loadData()" class="btn" style="margin-top: 10px;">🔄 Попробовать снова</button>
+                        <details style="margin-top: 15px; text-align: left; max-width: 600px; margin-left: auto; margin-right: auto;">
+                            <summary style="cursor: pointer; color: #667eea;">Детали ошибки</summary>
+                            <pre style="background: #f7fafc; padding: 10px; border-radius: 5px; margin-top: 10px; overflow-x: auto; font-size: 12px;">${error.stack || JSON.stringify(error, null, 2)}</pre>
+                        </details>
+                    </div>
+                `;
             }
         }
         
