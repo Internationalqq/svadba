@@ -655,6 +655,43 @@
                                 data-sm-anketa-name="" required>
                         </div>
 
+                        <div class="sm-form__block companion-group">
+                            <div class="sm-form__block__title">Если вы придете не один, напишите имя второго гостя</div>
+                            <input class="sm-form__input" type="text" placeholder="Имя и фамилия второго гостя (необязательно)" name="companion">
+                            <div class="companion-drinks-wrapper" id="companion-drinks-block" style="display: none;">
+                                <div class="sm-form__block__title" style="margin-bottom: 15px; font-size: 0.9em; opacity: 0.8;">Предпочтения по напиткам для второго гостя</div>
+                                <div class="sm-form__drinks">
+                                    <div class="sm-form__drinks-check" data-sm-anketa="1">
+                                        <label class="sm-form_checkbox">
+                                            <input class="sm-form_checkbox_input" type="checkbox" id="companion_alco20" name="companion_alco[]" value="2">
+                                            <span class="sm-form_checkbox_box"></span>
+                                            <div data-sm-alcoitem="">Белое вино</div>
+                                        </label>
+                                        <label class="sm-form_checkbox">
+                                            <input class="sm-form_checkbox_input" type="checkbox" id="companion_alco30" name="companion_alco[]" value="3">
+                                            <span class="sm-form_checkbox_box"></span>
+                                            <div data-sm-alcoitem="">Красное вино</div>
+                                        </label>
+                                        <label class="sm-form_checkbox">
+                                            <input class="sm-form_checkbox_input" type="checkbox" id="companion_alco40" name="companion_alco[]" value="4">
+                                            <span class="sm-form_checkbox_box"></span>
+                                            <div data-sm-alcoitem="">Виски</div>
+                                        </label>
+                                        <label class="sm-form_checkbox">
+                                            <input class="sm-form_checkbox_input" type="checkbox" id="companion_alco50" name="companion_alco[]" value="5">
+                                            <span class="sm-form_checkbox_box"></span>
+                                            <div data-sm-alcoitem="">Водка</div>
+                                        </label>
+                                        <label class="sm-form_checkbox">
+                                            <input class="sm-form_checkbox_input" type="checkbox" id="companion_alco80" name="companion_alco[]" value="8">
+                                            <span class="sm-form_checkbox_box"></span>
+                                            <div data-sm-alcoitem="">Не пью алкоголь</div>
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
                         <div class="sm-form__block">
                             <div class="sm-form__block__title" data-sm-text="ANKETA_QUESTION"
                                 title="Планируете ли Вы присутствовать?">Планируете ли Вы присутствовать?</div>
@@ -1124,6 +1161,29 @@
             font-family: "SMHeadersFont", sans-serif !important;
         }
 
+        /* Стили для объединенного блока второго гостя */
+        .companion-group {
+            transition: all 0.3s ease !important;
+            background: rgba(255, 255, 255, 0.08) !important;
+            border: 2px solid rgba(255, 255, 255, 0.3) !important;
+            border-radius: 12px !important;
+            padding: 20px !important;
+            margin: 15px 0 !important;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1) !important;
+        }
+        .companion-group .sm-form__block__title {
+            margin-bottom: 15px !important;
+        }
+        .companion-group .sm-form__input {
+            margin-bottom: 0 !important;
+        }
+        .companion-drinks-wrapper {
+            transition: all 0.3s ease-in-out !important;
+            border-top: 1px solid rgba(255, 255, 255, 0.2) !important;
+            margin-top: 20px !important;
+            padding-top: 20px !important;
+        }
+        
         /* Кружок date-active.svg поверх даты 6 в календаре */
         .sm-datetime {
             --date-active: url("./img/date-active.svg");
@@ -1421,6 +1481,27 @@
                         data.name = nameInput.value.trim();
                     }
 
+                    // Добавляем второго гостя (если указан)
+                    const companionInput = formContainer.querySelector('input[name="companion"]');
+                    if (companionInput && companionInput.value && companionInput.value.trim()) {
+                        data.companion = companionInput.value.trim();
+                    }
+                    
+                    // Добавляем алкоголь второго гостя (если выбран) - независимо от того, указано имя или нет
+                    const companionDrinkInputs = formContainer.querySelectorAll('input[name="companion_alco[]"]:checked');
+                    const companionDrinks = [];
+                    companionDrinkInputs.forEach(input => {
+                        companionDrinks.push(input.value);
+                    });
+                    console.log('Companion drinks inputs found:', companionDrinkInputs.length);
+                    console.log('Companion drinks selected:', companionDrinks);
+                    if (companionDrinks.length > 0) {
+                        data['companion_alco[]'] = companionDrinks;
+                        console.log('Companion drinks added to data:', data['companion_alco[]']);
+                    } else {
+                        console.log('No companion drinks selected');
+                    }
+
                     // Добавляем выбор (придет/не придет)
                     const choiceInput = formContainer.querySelector('input[name="choice"]:checked');
                     if (choiceInput) {
@@ -1452,6 +1533,8 @@
                             params.append(key, data[key]);
                         }
                     });
+                    console.log('Final data being sent:', data);
+                    console.log('Final params:', params.toString());
 
                     // Отправляем на сервер
                     fetch('/admin/api/save', {
@@ -1520,6 +1603,32 @@
                         });
                 });
 
+                // Показываем/скрываем блок выбора алкоголя для второго гостя
+                const companionInput = formContainer.querySelector('input[name="companion"]');
+                const companionDrinksBlock = formContainer.querySelector('#companion-drinks-block');
+                if (companionInput && companionDrinksBlock) {
+                    companionInput.addEventListener('input', function() {
+                        if (this.value && this.value.trim()) {
+                            companionDrinksBlock.style.display = 'block';
+                            // Плавное появление
+                            companionDrinksBlock.style.opacity = '0';
+                            companionDrinksBlock.style.transition = 'opacity 0.3s ease-in-out';
+                            setTimeout(() => {
+                                companionDrinksBlock.style.opacity = '1';
+                            }, 10);
+                        } else {
+                            // Плавное исчезновение
+                            companionDrinksBlock.style.opacity = '0';
+                            setTimeout(() => {
+                                companionDrinksBlock.style.display = 'none';
+                            }, 300);
+                            // Сбрасываем выбранные напитки второго гостя
+                            const companionDrinkInputs = companionDrinksBlock.querySelectorAll('input[type="checkbox"]');
+                            companionDrinkInputs.forEach(input => input.checked = false);
+                        }
+                    });
+                }
+                
                 // Убираем ошибки при вводе
                 const inputs = formContainer.querySelectorAll('input');
                 inputs.forEach(input => {
