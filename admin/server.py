@@ -17,7 +17,9 @@ import psycopg2
 from psycopg2.extras import RealDictCursor
 from urllib.parse import urlparse
 
+# Render автоматически устанавливает PORT через переменную окружения
 PORT = int(os.environ.get('PORT', 8000))
+print(f"Starting server on port {PORT}")
 
 def get_db_connection():
     """Получение подключения к PostgreSQL"""
