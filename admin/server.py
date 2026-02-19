@@ -626,13 +626,25 @@ class WeddingHandler(http.server.SimpleHTTPRequestHandler):
             cursor.execute('SELECT COUNT(*) FROM responses')
             total = cursor.fetchone()[0]
             
-            cursor.execute("SELECT COUNT(*) FROM responses WHERE attendance LIKE %s", ('%удовольствием%',))
-            coming = cursor.fetchone()[0]
+            # Придут: считаем людей (1 за ответ + 1 за второго гостя, если указан)
+            cursor.execute("SELECT companion FROM responses WHERE attendance LIKE %s", ('%удовольствием%',))
+            coming_rows = cursor.fetchall()
+            coming = 0
+            for (companion,) in coming_rows:
+                coming += 1  # основной гость
+                if companion and str(companion).strip():
+                    coming += 1  # второй гость
             
+            # Не придут: количество ответов
             cursor.execute("SELECT COUNT(*) FROM responses WHERE attendance LIKE %s", ('%Не смогу%',))
             not_coming = cursor.fetchone()[0]
             
-            cursor.execute("SELECT COUNT(*) FROM responses WHERE bus_option != '' AND bus_option != 'no' AND bus_option IS NOT NULL")
+            # Едут автобусом: только те, кто выбрал "да" (исключаем "Нет, доберусь сам(а)" и пустые)
+            cursor.execute("""
+                SELECT COUNT(*) FROM responses 
+                WHERE bus_option IS NOT NULL AND TRIM(bus_option) != '' 
+                AND bus_option NOT LIKE %s AND bus_option != %s
+            """, ('%Нет, доберусь%', 'no'))
             bus_users = cursor.fetchone()[0]
             
             # Статистика по алкоголю (учитываем алкоголь основного гостя и второго гостя)
