@@ -266,6 +266,10 @@
         <div id="drinks-stats">
             <div class="stat-card">
                 <div class="drink-item">
+                    <h4>Шампанское</h4>
+                    <span class="number" id="stat-drink-champagne">0</span>
+                </div>
+                <div class="drink-item">
                     <h4>Белое вино</h4>
                     <span class="number" id="stat-drink-white">0</span>
                 </div>
@@ -351,6 +355,7 @@
                 
                 // Статистика по алкоголю
                 if (stats.drinks_stats) {
+                    document.getElementById('stat-drink-champagne').textContent = stats.drinks_stats['Шампанское'] || 0;
                     document.getElementById('stat-drink-white').textContent = stats.drinks_stats['Белое вино'] || 0;
                     document.getElementById('stat-drink-red').textContent = stats.drinks_stats['Красное вино'] || 0;
                     document.getElementById('stat-drink-whiskey').textContent = stats.drinks_stats['Виски'] || 0;

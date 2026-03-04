@@ -362,6 +362,7 @@ class WeddingHandler(http.server.SimpleHTTPRequestHandler):
                 
                 # Маппинг напитков
                 drinks_map = {
+                    '1': 'Шампанское',
                     '2': 'Белое вино',
                     '3': 'Красное вино',
                     '4': 'Виски',
@@ -653,6 +654,7 @@ class WeddingHandler(http.server.SimpleHTTPRequestHandler):
             
             # Подсчитываем каждый тип напитка
             drinks_stats = {
+                'Шампанское': 0,
                 'Белое вино': 0,
                 'Красное вино': 0,
                 'Виски': 0,
