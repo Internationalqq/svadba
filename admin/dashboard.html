@@ -379,31 +379,7 @@
     <script>
         async function loadData() {
             try {
-                // Загружаем статистику (без искусственного таймаута)
-                const statsResponse = await fetch('/admin/api/stats');
-
-                if (!statsResponse.ok) {
-                    const errorText = await statsResponse.text();
-                    throw new Error(`HTTP ${statsResponse.status}: ${errorText}`);
-                }
-                const stats = await statsResponse.json();
-
-                document.getElementById('stat-total').textContent = stats.total;
-                document.getElementById('stat-coming').textContent = stats.coming;
-                document.getElementById('stat-not-coming').textContent = stats.not_coming;
-                document.getElementById('stat-bus').textContent = stats.bus_users;
-
-                // Статистика по алкоголю
-                if (stats.drinks_stats) {
-                    document.getElementById('stat-drink-champagne').textContent = stats.drinks_stats['Шампанское'] || 0;
-                    document.getElementById('stat-drink-white').textContent = stats.drinks_stats['Белое вино'] || 0;
-                    document.getElementById('stat-drink-red').textContent = stats.drinks_stats['Красное вино'] || 0;
-                    document.getElementById('stat-drink-whiskey').textContent = stats.drinks_stats['Виски'] || 0;
-                    document.getElementById('stat-drink-vodka').textContent = stats.drinks_stats['Водка'] || 0;
-                    document.getElementById('stat-drink-none').textContent = stats.drinks_stats['Не пью алкоголь'] || 0;
-                }
-
-                // Загружаем ответы (без искусственного таймаута)
+                // Загружаем только ответы (статистику считаем второстепенной, чтобы не блокировать таблицу)
                 const responsesResponse = await fetch('/admin/api/responses');
 
                 if (!responsesResponse.ok) {
