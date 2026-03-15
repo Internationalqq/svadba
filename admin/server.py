@@ -506,6 +506,8 @@ class WeddingHandler(http.server.SimpleHTTPRequestHandler):
             if conn is None:
                 raise Exception("get_db_connection() вернул None вместо объекта подключения")
             cursor = conn.cursor()
+            # Ограничиваем время выполнения DDL, чтобы не виснуть при проблемах с БД
+            cursor.execute("SET statement_timeout TO 5000")
             cursor.execute('''
                 CREATE TABLE IF NOT EXISTS responses (
                     id SERIAL PRIMARY KEY,
@@ -567,6 +569,8 @@ class WeddingHandler(http.server.SimpleHTTPRequestHandler):
             print("Database connection established")
             cursor = conn.cursor()
             print("Cursor created")
+            # Ограничиваем время вставки, чтобы Supabase не держал соединение слишком долго
+            cursor.execute("SET statement_timeout TO 5000")
             cursor.execute('''
                 INSERT INTO responses (name, companion, attendance, bus_option, drinks, companion_drinks)
                 VALUES (%s, %s, %s, %s, %s, %s)
