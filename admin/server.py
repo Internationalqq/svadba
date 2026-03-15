@@ -767,10 +767,14 @@ def main():
         import traceback
         traceback.print_exc()
         print("Server will start anyway, but database operations may fail.")
-    
+
     Handler = WeddingHandler
-    
-    with socketserver.TCPServer(("", PORT), Handler) as httpd:
+
+    # --- Многопоточный сервер ---
+    class ThreadedTCPServer(socketserver.ThreadingMixIn, socketserver.TCPServer):
+        allow_reuse_address = True
+
+    with ThreadedTCPServer(("", PORT), Handler) as httpd:
         print("=" * 60)
         print(f"SERVER STARTED!")
         print(f"Port:        {PORT}")
@@ -784,6 +788,3 @@ def main():
             httpd.serve_forever()
         except KeyboardInterrupt:
             print("\n\nServer stopped")
-
-if __name__ == "__main__":
-    main()
