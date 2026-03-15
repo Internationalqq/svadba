@@ -379,14 +379,8 @@
     <script>
         async function loadData() {
             try {
-                // Загружаем статистику с таймаутом
-                const statsController = new AbortController();
-                const statsTimeout = setTimeout(() => statsController.abort(), 30000); // 30 секунд
-
-                const statsResponse = await fetch('/admin/api/stats', {
-                    signal: statsController.signal
-                });
-                clearTimeout(statsTimeout);
+                // Загружаем статистику (без искусственного таймаута)
+                const statsResponse = await fetch('/admin/api/stats');
 
                 if (!statsResponse.ok) {
                     const errorText = await statsResponse.text();
@@ -409,14 +403,8 @@
                     document.getElementById('stat-drink-none').textContent = stats.drinks_stats['Не пью алкоголь'] || 0;
                 }
 
-                // Загружаем ответы с таймаутом
-                const responsesController = new AbortController();
-                const responsesTimeout = setTimeout(() => responsesController.abort(), 10000); // 10 секунд
-
-                const responsesResponse = await fetch('/admin/api/responses', {
-                    signal: responsesController.signal
-                });
-                clearTimeout(responsesTimeout);
+                // Загружаем ответы (без искусственного таймаута)
+                const responsesResponse = await fetch('/admin/api/responses');
 
                 if (!responsesResponse.ok) {
                     const errorText = await responsesResponse.text();
@@ -500,11 +488,8 @@
                 console.error('Error loading data:', error);
                 let errorMessage = error.message || 'Неизвестная ошибка';
 
-                // Проверяем тип ошибки
-                if (error.name === 'AbortError') {
-                    errorMessage = 'Превышено время ожидания ответа от сервера. Проверьте, что сервер запущен и доступен.';
-                } else if (error.message.includes('Failed to fetch')) {
-                    errorMessage = 'Не удалось подключиться к серверу. Убедитесь, что сервер запущен на порту 8000.';
+                if (error.message && error.message.includes('Failed to fetch')) {
+                    errorMessage = 'Не удалось подключиться к серверу. Убедитесь, что сервер запущен и доступен.';
                 }
 
                 document.getElementById('loading').innerHTML = `
