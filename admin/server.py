@@ -624,6 +624,9 @@ class WeddingHandler(http.server.SimpleHTTPRequestHandler):
                 raise Exception("get_db_connection() вернул None вместо объекта подключения")
             cursor = conn.cursor()
             
+            # Ограничиваем время выполнения SQL-запросов, чтобы не висеть вечно
+            cursor.execute("SET statement_timeout TO 3000")  # максимум 3 секунды
+            
             cursor.execute('SELECT COUNT(*) FROM responses')
             total = cursor.fetchone()[0]
             
@@ -692,7 +695,21 @@ class WeddingHandler(http.server.SimpleHTTPRequestHandler):
             error_msg = str(e)
             traceback.print_exc()
             print(f"Error in get_stats: {error_msg}")
-            raise Exception(f"Ошибка получения статистики из БД: {error_msg}")
+            # Возвращаем пустую статистику, чтобы админка не падала
+            return {
+                'total': 0,
+                'coming': 0,
+                'not_coming': 0,
+                'bus_users': 0,
+                'drinks_stats': {
+                    'Шампанское': 0,
+                    'Белое вино': 0,
+                    'Красное вино': 0,
+                    'Виски': 0,
+                    'Водка': 0,
+                    'Не пью алкоголь': 0
+                }
+            }
     
     def export_to_csv(self):
         """Экспорт в CSV"""
@@ -767,14 +784,10 @@ def main():
         import traceback
         traceback.print_exc()
         print("Server will start anyway, but database operations may fail.")
-
+    
     Handler = WeddingHandler
-
-    # --- Многопоточный сервер ---
-    class ThreadedTCPServer(socketserver.ThreadingMixIn, socketserver.TCPServer):
-        allow_reuse_address = True
-
-    with ThreadedTCPServer(("", PORT), Handler) as httpd:
+    
+    with socketserver.TCPServer(("", PORT), Handler) as httpd:
         print("=" * 60)
         print(f"SERVER STARTED!")
         print(f"Port:        {PORT}")
@@ -788,3 +801,6 @@ def main():
             httpd.serve_forever()
         except KeyboardInterrupt:
             print("\n\nServer stopped")
+
+if __name__ == "__main__":
+    main()
