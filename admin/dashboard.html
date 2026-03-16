@@ -562,14 +562,25 @@
             }
         }
 
-        // Загружаем данные при открытии страницы
-        loadData();
+        // Функция для последовательной загрузки
+        async function refreshAll() {
+            console.log('Загрузка таблицы...');
+            await loadData();
 
-        loadStats();
+            // Ждем 1.5 секунды перед запросом статистики, чтобы сервер успел "выдохнуть"
+            setTimeout(async () => {
+                console.log('Загрузка статистики...');
+                if (typeof loadStats === 'function') {
+                    await loadStats();
+                }
+            }, 1500);
+        }
 
-        // Автообновление каждые 30 секунд
-        setInterval(loadData, 30000);
-        setInterval(loadStats, 30000);
+        // Запуск при открытии страницы
+        refreshAll();
+
+        // Автообновление раз в минуту (не делай чаще, чтобы не вешать базу)
+        setInterval(refreshAll, 60000);
     </script>
 </body>
 
