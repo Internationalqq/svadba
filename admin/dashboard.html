@@ -379,69 +379,134 @@
     <script>
         async function loadData() {
             try {
-                // 1. ЗАГРУЖАЕМ СТАТИСТИКУ (цифры сверху)
+                // 1. Сначала пробуем загрузить статистику
                 try {
-                    const statsResponse = await fetch('/admin/api/stats');
-                    if (statsResponse.ok) {
-                        const stats = await statsResponse.json();
+                    const statsRes = await fetch('/admin/api/stats');
+                    if (statsRes.ok) {
+                        const s = await statsRes.json();
+                        document.getElementById('stat-total').textContent = s.total || 0;
+                        document.getElementById('stat-coming').textContent = s.coming || 0;
+                        document.getElementById('stat-not-coming').textContent = s.not_coming || 0;
+                        document.getElementById('stat-bus').textContent = s.bus_users || 0;
 
-                        // Заполняем основные карточки
-                        document.getElementById('stat-total').textContent = stats.total || 0;
-                        document.getElementById('stat-coming').textContent = stats.coming || 0;
-                        document.getElementById('stat-not-coming').textContent = stats.not_coming || 0;
-                        document.getElementById('stat-bus').textContent = stats.bus_users || 0;
-
-                        // Заполняем алкоголь
-                        if (stats.drinks_stats) {
-                            document.getElementById('stat-drink-champagne').textContent = stats.drinks_stats['Шампанское'] || 0;
-                            document.getElementById('stat-drink-white').textContent = stats.drinks_stats['Белое вино'] || 0;
-                            document.getElementById('stat-drink-red').textContent = stats.drinks_stats['Красное вино'] || 0;
-                            document.getElementById('stat-drink-whiskey').textContent = stats.drinks_stats['Виски'] || 0;
-                            document.getElementById('stat-drink-vodka').textContent = stats.drinks_stats['Водка'] || 0;
-                            document.getElementById('stat-drink-none').textContent = stats.drinks_stats['Не пью алкоголь'] || 0;
+                        if (s.drinks_stats) {
+                            document.getElementById('stat-drink-champagne').textContent = s.drinks_stats['Шампанское'] || 0;
+                            document.getElementById('stat-drink-white').textContent = s.drinks_stats['Белое вино'] || 0;
+                            document.getElementById('stat-drink-red').textContent = s.drinks_stats['Красное вино'] || 0;
+                            document.getElementById('stat-drink-whiskey').textContent = s.drinks_stats['Виски'] || 0;
+                            document.getElementById('stat-drink-vodka').textContent = s.drinks_stats['Водка'] || 0;
+                            document.getElementById('stat-drink-none').textContent = s.drinks_stats['Не пью алкоголь'] || 0;
                         }
                     }
-                } catch (e) {
-                    console.error('Ошибка загрузки статистики:', e);
-                }
+                } catch (e) { console.error("Stats error:", e); }
 
-                // 2. ЗАГРУЖАЕМ ТАБЛИЦУ (твой существующий код)
-                const responsesResponse = await fetch('/admin/api/responses');
-
-                if (!responsesResponse.ok) {
-                    const errorText = await responsesResponse.text();
-                    throw new Error(`HTTP ${responsesResponse.status}: ${errorText}`);
-                }
-                const responsesData = await responsesResponse.json();
-
-                let responses = [];
-                if (Array.isArray(responsesData)) {
-                    responses = responsesData;
-                } else if (responsesData && responsesData.error) {
-                    throw new Error(responsesData.message || 'Ошибка получения данных');
-                }
+                // 2. Загружаем основную таблицу
+                const res = await fetch('/admin/api/responses');
+                const data = await res.json();
 
                 const tbody = document.getElementById('table-body');
                 tbody.innerHTML = '';
 
-                if (responses.length === 0) {
+                if (!data || data.length === 0) {
                     document.getElementById('empty').style.display = 'block';
                     document.getElementById('responses-table').style.display = 'none';
                 } else {
                     document.getElementById('empty').style.display = 'none';
                     document.getElementById('responses-table').style.display = 'table';
 
-                    responses.forEach(row => {
+                    data.forEach(row => {
                         const tr = document.createElement('tr');
-                        const isAttending = row.attendance && row.attendance.includes('удовольствием');
-                        const badge = isAttending
-                            ? '<span class="badge badge-yes">✓ Да</span>'
-                            : '<span class="badge badge-no">✗ Нет</span>';
-
-                        const date = new Date(row.created_at);
-                        const formattedDate = date.toLocaleString('ru-RU');
-
+                        const isYes = row.attendance && row.attendance.includes('удовольствием');
                         tr.innerHTML = `
+                    <td>#${row.id}</td>
+                    <td><strong>${row.name || '-'}</strong></td>
+                    <td>${row.companion || '-'}</td>
+                    <td>${isYes ? '✅ Да' : '❌ Нет'}</td>
+                    <td>${row.bus_option || '-'}</td>
+                    <td>${row.drinks || '-'}</td>
+                    <td>${row.companion_drinks || '-'}</td>
+                    <td>${new Date(row.created_at).toLocaleString('ru-RU')}</td>
+                    <td><button class="btn-delete" onclick="deleteRecord(${row.id}, '${row.name}')">🗑️</button></td>
+                `;
+                        tbody.appendChild(tr);
+                    });
+                }
+
+                // ПРЯЧЕМ ЗАГРУЗКУ
+                document.getElementById('loading').style.display = 'none';
+                document.getElementById('content').style.display = 'block';
+
+            } catch (err) {
+                console.error("Main load error:", err);
+                document.getElementById('loading').innerHTML = "Ошибка: " + err.message;
+            }
+        }
+
+
+        try {
+            // 1. ЗАГРУЖАЕМ СТАТИСТИКУ (цифры сверху)
+            try {
+                const statsResponse = await fetch('/admin/api/stats');
+                if (statsResponse.ok) {
+                    const stats = await statsResponse.json();
+
+                    // Заполняем основные карточки
+                    document.getElementById('stat-total').textContent = stats.total || 0;
+                    document.getElementById('stat-coming').textContent = stats.coming || 0;
+                    document.getElementById('stat-not-coming').textContent = stats.not_coming || 0;
+                    document.getElementById('stat-bus').textContent = stats.bus_users || 0;
+
+                    // Заполняем алкоголь
+                    if (stats.drinks_stats) {
+                        document.getElementById('stat-drink-champagne').textContent = stats.drinks_stats['Шампанское'] || 0;
+                        document.getElementById('stat-drink-white').textContent = stats.drinks_stats['Белое вино'] || 0;
+                        document.getElementById('stat-drink-red').textContent = stats.drinks_stats['Красное вино'] || 0;
+                        document.getElementById('stat-drink-whiskey').textContent = stats.drinks_stats['Виски'] || 0;
+                        document.getElementById('stat-drink-vodka').textContent = stats.drinks_stats['Водка'] || 0;
+                        document.getElementById('stat-drink-none').textContent = stats.drinks_stats['Не пью алкоголь'] || 0;
+                    }
+                }
+            } catch (e) {
+                console.error('Ошибка загрузки статистики:', e);
+            }
+
+            // 2. ЗАГРУЖАЕМ ТАБЛИЦУ (твой существующий код)
+            const responsesResponse = await fetch('/admin/api/responses');
+
+            if (!responsesResponse.ok) {
+                const errorText = await responsesResponse.text();
+                throw new Error(`HTTP ${responsesResponse.status}: ${errorText}`);
+            }
+            const responsesData = await responsesResponse.json();
+
+            let responses = [];
+            if (Array.isArray(responsesData)) {
+                responses = responsesData;
+            } else if (responsesData && responsesData.error) {
+                throw new Error(responsesData.message || 'Ошибка получения данных');
+            }
+
+            const tbody = document.getElementById('table-body');
+            tbody.innerHTML = '';
+
+            if (responses.length === 0) {
+                document.getElementById('empty').style.display = 'block';
+                document.getElementById('responses-table').style.display = 'none';
+            } else {
+                document.getElementById('empty').style.display = 'none';
+                document.getElementById('responses-table').style.display = 'table';
+
+                responses.forEach(row => {
+                    const tr = document.createElement('tr');
+                    const isAttending = row.attendance && row.attendance.includes('удовольствием');
+                    const badge = isAttending
+                        ? '<span class="badge badge-yes">✓ Да</span>'
+                        : '<span class="badge badge-no">✗ Нет</span>';
+
+                    const date = new Date(row.created_at);
+                    const formattedDate = date.toLocaleString('ru-RU');
+
+                    tr.innerHTML = `
                             <td><strong>#${row.id}</strong></td>
                             <td><strong>${row.name || '-'}</strong></td>
                             <td>${row.companion || '-'}</td>
@@ -456,17 +521,17 @@
                                 </button>
                             </td>
                         `;
-                        tbody.appendChild(tr);
-                    });
-                }
-
-                document.getElementById('loading').style.display = 'none';
-                document.getElementById('content').style.display = 'block';
-
-            } catch (error) {
-                console.error('Error loading data:', error);
-                document.getElementById('loading').innerHTML = `<h3 style="color:red">Ошибка: ${error.message}</h3>`;
+                    tbody.appendChild(tr);
+                });
             }
+
+            document.getElementById('loading').style.display = 'none';
+            document.getElementById('content').style.display = 'block';
+
+        } catch (error) {
+            console.error('Error loading data:', error);
+            document.getElementById('loading').innerHTML = `<h3 style="color:red">Ошибка: ${error.message}</h3>`;
+        }
         }
         // Функция удаления записи
         async function deleteRecord(id, name) {
