@@ -23,7 +23,7 @@ print(f"Starting server on port {PORT}")
 
 def get_db_connection():
     # Твоя строка (с твоим текущим паролем)
-    db_url = "postgresql://postgres:tQ/5ShuHtg7FbgT@db.dxfnguweggcefslzgvzs.supabase.co:5432/postgres"
+    db_url = "postgresql://postgres:tQ%2F5ShuHtg7FbgT@db.dxfnguweggcefslzgvzs.supabase.co:5432/postgres"
     
     # Убираем try/except, чтобы ошибка НЕ проглатывалась
     print("Попытка подключения к базе...")
@@ -596,7 +596,7 @@ def main():
     
     # Если все еще нет, устанавливаем по умолчанию
     if not database_url:
-        database_url = "postgresql://postgres:tQ/5ShuHtg7FbgT@db.dxfnguweggcefslzgvzs.supabase.co:5432/postgres"
+        database_url = "postgresql://postgres:tQ%2F5ShuHtg7FbgT@db.dxfnguweggcefslzgvzs.supabase.co:5432/postgres"
         os.environ['DATABASE_URL'] = database_url
         print("⚠️  Using default DATABASE_URL")
     
