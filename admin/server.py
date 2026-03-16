@@ -600,16 +600,31 @@ def main():
         os.environ['DATABASE_URL'] = database_url
         print("⚠️  Using default DATABASE_URL")
     
-    # Инициализируем БД при старте
+# Инициализируем БД при старте ПРАВИЛЬНО
     try:
-        handler = WeddingHandler(None, None, None)
-        handler.init_database()
-        print("✅ Database connection successful!")
+        print("Инициализация базы данных...")
+        conn = get_db_connection()
+        if conn:
+            cursor = conn.cursor()
+            # Копируем сюда SQL-запрос создания таблицы из init_database
+            cursor.execute('''
+                CREATE TABLE IF NOT EXISTS responses (
+                    id SERIAL PRIMARY KEY,
+                    name TEXT NOT NULL,
+                    companion TEXT,
+                    attendance TEXT,
+                    bus_option TEXT,
+                    drinks TEXT,
+                    companion_drinks TEXT,
+                    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+                )
+            ''')
+            conn.commit()
+            cursor.close()
+            conn.close()
+            print("✅ База данных готова к работе!")
     except Exception as e:
-        print(f"WARNING: Database initialization failed: {e}")
-        import traceback
-        traceback.print_exc()
-        print("Server will start anyway, but database operations may fail.")
+        print(f"⚠️ Ошибка при подготовке БД: {e}")
     
     Handler = WeddingHandler
     
