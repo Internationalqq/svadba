@@ -22,190 +22,13 @@ PORT = int(os.environ.get('PORT', 8000))
 print(f"Starting server on port {PORT}")
 
 def get_db_connection():
-    """Получение подключения к PostgreSQL"""
-    # Пробуем получить из переменных окружения
-    database_url = os.environ.get('DATABASE_URL')
-    
-    # Если не найдена, пробуем прочитать из файла .env
-    if not database_url:
-        # Пробуем несколько возможных путей к .env файлу
-        possible_paths = [
-            os.path.join(os.path.dirname(__file__), '..', '.env'),  # Корень проекта
-            os.path.join(os.path.dirname(__file__), '.env'),  # В папке admin
-            os.path.join(os.getcwd(), '.env'),  # Текущая рабочая директория
-            '.env'  # Текущая директория
-        ]
-        
-        for env_file in possible_paths:
-            env_file = os.path.abspath(env_file)
-            print(f"Checking .env file at: {env_file}")
-            if os.path.exists(env_file):
-                print(f"Found .env file at: {env_file}")
-                try:
-                    with open(env_file, 'r', encoding='utf-8') as f:
-                        for line in f:
-                            line = line.strip()
-                            if line and not line.startswith('#') and 'DATABASE_URL' in line:
-                                if '=' in line:
-                                    database_url = line.split('=', 1)[1].strip().strip('"').strip("'")
-                                    print(f"Loaded DATABASE_URL from .env file")
-                                    break
-                except Exception as e:
-                    print(f"Error reading .env file: {e}")
-                if database_url:
-                    break
-    
-    # Если все еще не найдена, используем значение по умолчанию (для локальной разработки)
-    if not database_url:
-        database_url = "postgresql://postgres:tQ/5ShuHtg7FbgT@db.dxfnguweggcefslzgvzs.supabase.co:5432/postgres"
-        print("⚠️  DATABASE_URL не установлена, используется значение по умолчанию")
-    
-    # Проверяем, что database_url установлена
-    if not database_url:
-        raise Exception("DATABASE_URL не установлена в переменных окружения или файле .env")
-    
-    print(f"Using DATABASE_URL: {database_url[:50]}...")  # Показываем только начало для безопасности
-    
-    # Парсим URL вручную, так как urlparse не может правильно обработать пароль с символом /
-    # Формат: postgresql://user:password@host:port/database
-    import re
-    from urllib.parse import unquote
-    
-    print(f"Attempting to connect to database...")
-    
-    # Используем регулярное выражение для парсинга
-    # Схема: postgresql://
-    # Пользователь и пароль: user:password@
-    # Хост и порт: host:port
-    # База данных: /database?params
-    pattern = r'postgresql://([^:]+):([^@]+)@([^:/]+):(\d+)/([^?]+)(?:\?(.+))?'
-    match = re.match(pattern, database_url)
-    
-    conn = None
-    
-    if match:
-        username, password, hostname, port_str, database, params = match.groups()
-        # Декодируем URL-кодированные символы
-        username = unquote(username)
-        password = unquote(password)
-        database = unquote(database)
-        
-        # Убираем параметры из имени базы данных если они там есть
-        if '?' in database:
-            database = database.split('?')[0]
-        
-        print(f"Parsed connection params: user={username}, host={hostname}, port={port_str}, db={database}")
-        
-        try:
-            port = int(port_str)
-        except ValueError:
-            raise Exception(f"Неверный формат порта: {port_str}")
-        
-        try:
-            print(f"Connecting to PostgreSQL at {hostname}:{port}...")
-            
-            # Пробуем резолвить домен (IPv4 или IPv6)
-            import socket
-            resolved_address = None
-            
-            # Сначала пробуем IPv4
-            try:
-                print(f"Resolving hostname {hostname} to IPv4...")
-                addr_info = socket.getaddrinfo(hostname, port, socket.AF_INET, socket.SOCK_STREAM)
-                if addr_info:
-                    resolved_address = addr_info[0][4][0]
-                    print(f"✅ Resolved to IPv4: {resolved_address}")
-            except (socket.gaierror, IndexError):
-                print(f"⚠️  No IPv4 address found, trying IPv6...")
-                # Пробуем IPv6
-                try:
-                    addr_info = socket.getaddrinfo(hostname, port, socket.AF_INET6, socket.SOCK_STREAM)
-                    if addr_info:
-                        resolved_address = addr_info[0][4][0]
-                        print(f"✅ Resolved to IPv6: {resolved_address}")
-                except (socket.gaierror, IndexError):
-                    print(f"⚠️  No IPv6 address found either")
-            
-            # Пробуем подключиться через резолвленный адрес (если найден)
-            if resolved_address:
-                try:
-                    print(f"Connecting via resolved address {resolved_address}...")
-                    conn = psycopg2.connect(
-                        database=database,
-                        user=username,
-                        password=password,
-                        host=resolved_address,
-                        port=port,
-                        connect_timeout=5  # Уменьшаем таймаут до 5 секунд для быстрого ответа
-                    )
-                    print(f"✅ Database connection established!")
-                    return conn
-                except Exception as e:
-                    print(f"❌ Failed via resolved address: {e}")
-                    print(f"Trying via hostname directly...")
-            
-            # Если резолвинг не сработал, пробуем через hostname напрямую
-            # psycopg2 сам попробует резолвить и подключиться
-            print(f"Connecting via hostname {hostname} (psycopg2 will handle DNS)...")
-            
-            # Формируем параметры подключения
-            connect_params = {
-                'database': database,
-                'user': username,
-                'password': password,
-                'host': hostname,
-                'port': port,
-                'connect_timeout': 5
-            }
-            
-            # Если есть параметры в URL (например ?pgbouncer=true), добавляем их
-            if params:
-                print(f"Connection params from URL: {params}")
-            
-            conn = psycopg2.connect(**connect_params)
-            print(f"✅ Database connection established!")
-            return conn
-        except Exception as e:
-            error_msg = str(e)
-            print(f"❌ Error connecting to database: {error_msg}")
-            import traceback
-            traceback.print_exc()
-            
-            # Более понятное сообщение об ошибке
-            if "getaddrinfo failed" in error_msg or "11001" in error_msg:
-                raise Exception(
-                    "Не удалось подключиться к базе данных Supabase.\n\n"
-                    "Возможные причины:\n"
-                    "1. Supabase блокирует прямые подключения на порту 5432\n"
-                    "2. Нужно использовать Connection Pooling (порт 6543)\n"
-                    "3. Проблема с интернет-соединением или DNS\n\n"
-                    "Решение: Используйте Connection Pooling URL из Supabase Dashboard:\n"
-                    "Settings → Database → Connection string → Connection pooling\n"
-                    f"Текущая ошибка: {error_msg}"
-                )
-            else:
-                raise Exception(f"Ошибка подключения к БД: {error_msg}")
-    else:
-        # Если регулярное выражение не сработало, пробуем напрямую
-        print(f"Regex didn't match, trying direct connection with URL...")
-        try:
-            # Для прямого подключения psycopg2 сам разберет URL
-            # Включая параметры типа ?pgbouncer=true
-            conn = psycopg2.connect(database_url, connect_timeout=5)
-            print(f"✅ Database connection established (direct)!")
-            return conn
-        except Exception as e:
-            error_msg = str(e)
-            print(f"❌ Error connecting to database (direct): {error_msg}")
-            import traceback
-            traceback.print_exc()
-            raise Exception(f"Ошибка подключения к БД: {error_msg}")
-    
-    # Если мы дошли сюда, что-то пошло не так
-    if conn is None:
-        raise Exception("Не удалось установить подключение к БД: функция вернула None")
-    
-    return conn
+    # Используем порт 6543 (Connection Pooler Supabase)
+    db_url = "postgresql://postgres:tQ/5ShuHtg7FbgT@db.dxfnguweggcefslzgvzs.supabase.co:6543/postgres"
+    try:
+        return psycopg2.connect(db_url, connect_timeout=10)
+    except Exception as e:
+        print(f"Ошибка подключения к БД: {e}")
+        return None
 
 class WeddingHandler(http.server.SimpleHTTPRequestHandler):
     
@@ -305,7 +128,7 @@ class WeddingHandler(http.server.SimpleHTTPRequestHandler):
                     return
                 
                 # Инициализируем БД
-                self.init_database()
+                # self.init_database()
                 
                 # Удаляем из БД
                 conn = get_db_connection()
@@ -561,7 +384,7 @@ class WeddingHandler(http.server.SimpleHTTPRequestHandler):
         """Сохранение ответа в БД"""
         print(f"save_response called: name={name}, companion={companion}, attendance={attendance}, bus={bus}, drinks={drinks}, companion_drinks={companion_drinks}")
         try:
-            self.init_database()
+            # self.init_database()
             print("Database initialized")
             conn = get_db_connection()
             if conn is None:
@@ -590,7 +413,7 @@ class WeddingHandler(http.server.SimpleHTTPRequestHandler):
     def get_responses(self):
         """Получение всех ответов"""
         try:
-            self.init_database()
+            # self.init_database()
             conn = get_db_connection()
             if conn is None:
                 raise Exception("get_db_connection() вернул None вместо объекта подключения")
@@ -622,7 +445,7 @@ class WeddingHandler(http.server.SimpleHTTPRequestHandler):
     def get_stats(self):
         """Получение статистики"""
         try:
-            self.init_database()
+            # self.init_database()
             conn = get_db_connection()
             if conn is None:
                 raise Exception("get_db_connection() вернул None вместо объекта подключения")
