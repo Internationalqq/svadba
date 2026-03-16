@@ -379,129 +379,65 @@
     <script>
         async function loadData() {
             try {
-                // 1. Сначала пробуем загрузить статистику
-                try {
-                    const statsRes = await fetch('/admin/api/stats');
-                    if (statsRes.ok) {
-                        const s = await statsRes.json();
-                        document.getElementById('stat-total').textContent = s.total || 0;
-                        document.getElementById('stat-coming').textContent = s.coming || 0;
-                        document.getElementById('stat-not-coming').textContent = s.not_coming || 0;
-                        document.getElementById('stat-bus').textContent = s.bus_users || 0;
+                // Загружаем только ответы (статистику считаем второстепенной, чтобы не блокировать таблицу)
+                const responsesResponse = await fetch('/admin/api/responses');
 
-                        if (s.drinks_stats) {
-                            document.getElementById('stat-drink-champagne').textContent = s.drinks_stats['Шампанское'] || 0;
-                            document.getElementById('stat-drink-white').textContent = s.drinks_stats['Белое вино'] || 0;
-                            document.getElementById('stat-drink-red').textContent = s.drinks_stats['Красное вино'] || 0;
-                            document.getElementById('stat-drink-whiskey').textContent = s.drinks_stats['Виски'] || 0;
-                            document.getElementById('stat-drink-vodka').textContent = s.drinks_stats['Водка'] || 0;
-                            document.getElementById('stat-drink-none').textContent = s.drinks_stats['Не пью алкоголь'] || 0;
+                if (!responsesResponse.ok) {
+                    const errorText = await responsesResponse.text();
+                    throw new Error(`HTTP ${responsesResponse.status}: ${errorText}`);
+                }
+                const responsesData = await responsesResponse.json();
+
+                // Проверяем, что ответ является массивом
+                let responses = [];
+                if (Array.isArray(responsesData)) {
+                    responses = responsesData;
+                    // Логируем для отладки
+                    responses.forEach((row, index) => {
+                        if (row.companion_drinks) {
+                            console.log(`Response ${index}: companion_drinks =`, row.companion_drinks);
                         }
-                    }
-                } catch (e) { console.error("Stats error:", e); }
-
-                // 2. Загружаем основную таблицу
-                const res = await fetch('/admin/api/responses');
-                const data = await res.json();
+                    });
+                } else if (responsesData && responsesData.error) {
+                    throw new Error(responsesData.message || 'Ошибка получения данных');
+                } else {
+                    console.warn('Unexpected response format:', responsesData);
+                    responses = [];
+                }
 
                 const tbody = document.getElementById('table-body');
                 tbody.innerHTML = '';
 
-                if (!data || data.length === 0) {
+                if (responses.length === 0) {
                     document.getElementById('empty').style.display = 'block';
                     document.getElementById('responses-table').style.display = 'none';
                 } else {
                     document.getElementById('empty').style.display = 'none';
                     document.getElementById('responses-table').style.display = 'table';
 
-                    data.forEach(row => {
+                    responses.forEach(row => {
                         const tr = document.createElement('tr');
-                        const isYes = row.attendance && row.attendance.includes('удовольствием');
+
+                        const isAttending = row.attendance && row.attendance.includes('удовольствием');
+                        const badge = isAttending
+                            ? '<span class="badge badge-yes">✓ Да</span>'
+                            : '<span class="badge badge-no">✗ Нет</span>';
+
+                        const date = new Date(row.created_at);
+                        const formattedDate = date.toLocaleString('ru-RU', {
+                            day: '2-digit',
+                            month: '2-digit',
+                            year: 'numeric',
+                            hour: '2-digit',
+                            minute: '2-digit'
+                        });
+
+                        // Логируем для отладки
+                        if (row.companion_drinks) {
+                            console.log(`Row ${row.id}: companion_drinks =`, row.companion_drinks);
+                        }
+
                         tr.innerHTML = `
-                    <td>#${row.id}</td>
-                    <td><strong>${row.name || '-'}</strong></td>
-                    <td>${row.companion || '-'}</td>
-                    <td>${isYes ? '✅ Да' : '❌ Нет'}</td>
-                    <td>${row.bus_option || '-'}</td>
-                    <td>${row.drinks || '-'}</td>
-                    <td>${row.companion_drinks || '-'}</td>
-                    <td>${new Date(row.created_at).toLocaleString('ru-RU')}</td>
-                    <td><button class="btn-delete" onclick="deleteRecord(${row.id}, '${row.name}')">🗑️</button></td>
-                `;
-                        tbody.appendChild(tr);
-                    });
-                }
-
-                // ПРЯЧЕМ ЗАГРУЗКУ
-                document.getElementById('loading').style.display = 'none';
-                document.getElementById('content').style.display = 'block';
-
-            } catch (err) {
-                console.error("Main load error:", err);
-                document.getElementById('loading').innerHTML = "Ошибка: " + err.message;
-            }
-        }
-
-        try {
-            // Загружаем только ответы (статистику считаем второстепенной, чтобы не блокировать таблицу)
-            const responsesResponse = await fetch('/admin/api/responses');
-
-            if (!responsesResponse.ok) {
-                const errorText = await responsesResponse.text();
-                throw new Error(`HTTP ${responsesResponse.status}: ${errorText}`);
-            }
-            const responsesData = await responsesResponse.json();
-
-            // Проверяем, что ответ является массивом
-            let responses = [];
-            if (Array.isArray(responsesData)) {
-                responses = responsesData;
-                // Логируем для отладки
-                responses.forEach((row, index) => {
-                    if (row.companion_drinks) {
-                        console.log(`Response ${index}: companion_drinks =`, row.companion_drinks);
-                    }
-                });
-            } else if (responsesData && responsesData.error) {
-                throw new Error(responsesData.message || 'Ошибка получения данных');
-            } else {
-                console.warn('Unexpected response format:', responsesData);
-                responses = [];
-            }
-
-            const tbody = document.getElementById('table-body');
-            tbody.innerHTML = '';
-
-            if (responses.length === 0) {
-                document.getElementById('empty').style.display = 'block';
-                document.getElementById('responses-table').style.display = 'none';
-            } else {
-                document.getElementById('empty').style.display = 'none';
-                document.getElementById('responses-table').style.display = 'table';
-
-                responses.forEach(row => {
-                    const tr = document.createElement('tr');
-
-                    const isAttending = row.attendance && row.attendance.includes('удовольствием');
-                    const badge = isAttending
-                        ? '<span class="badge badge-yes">✓ Да</span>'
-                        : '<span class="badge badge-no">✗ Нет</span>';
-
-                    const date = new Date(row.created_at);
-                    const formattedDate = date.toLocaleString('ru-RU', {
-                        day: '2-digit',
-                        month: '2-digit',
-                        year: 'numeric',
-                        hour: '2-digit',
-                        minute: '2-digit'
-                    });
-
-                    // Логируем для отладки
-                    if (row.companion_drinks) {
-                        console.log(`Row ${row.id}: companion_drinks =`, row.companion_drinks);
-                    }
-
-                    tr.innerHTML = `
                             <td><strong>#${row.id}</strong></td>
                             <td><strong>${row.name || '-'}</strong></td>
                             <td>${row.companion || '-'}</td>
@@ -517,22 +453,22 @@
                             </td>
                         `;
 
-                    tbody.appendChild(tr);
-                });
-            }
+                        tbody.appendChild(tr);
+                    });
+                }
 
-            document.getElementById('loading').style.display = 'none';
-            document.getElementById('content').style.display = 'block';
+                document.getElementById('loading').style.display = 'none';
+                document.getElementById('content').style.display = 'block';
 
-        } catch (error) {
-            console.error('Error loading data:', error);
-            let errorMessage = error.message || 'Неизвестная ошибка';
+            } catch (error) {
+                console.error('Error loading data:', error);
+                let errorMessage = error.message || 'Неизвестная ошибка';
 
-            if (error.message && error.message.includes('Failed to fetch')) {
-                errorMessage = 'Не удалось подключиться к серверу. Убедитесь, что сервер запущен и доступен.';
-            }
+                if (error.message && error.message.includes('Failed to fetch')) {
+                    errorMessage = 'Не удалось подключиться к серверу. Убедитесь, что сервер запущен и доступен.';
+                }
 
-            document.getElementById('loading').innerHTML = `
+                document.getElementById('loading').innerHTML = `
                     <div style="color: #f56565; padding: 20px; text-align: center;">
                         <div style="font-size: 48px; margin-bottom: 10px;">❌</div>
                         <h3 style="color: #c53030; margin-bottom: 10px;">Ошибка загрузки данных</h3>
@@ -544,7 +480,7 @@
                         </details>
                     </div>
                 `;
-        }
+            }
         }
 
         // Функция удаления записи
@@ -594,11 +530,46 @@
             }
         }
 
+        async function loadStats() {
+            try {
+                const res = await fetch('/admin/api/stats');
+                if (!res.ok) return;
+                const s = await res.json();
+
+                // Функция-помощник: обновляет текст, если ID существует
+                const up = (id, val) => {
+                    const el = document.getElementById(id);
+                    if (el) el.textContent = val || 0;
+                };
+
+                // Обновляем основные цифры
+                up('stat-total', s.total);
+                up('stat-coming', s.coming);
+                up('stat-not-coming', s.not_coming);
+                up('stat-bus', s.bus_users);
+
+                // Обновляем алкоголь
+                if (s.drinks_stats) {
+                    up('stat-drink-champagne', s.drinks_stats['Шампанское']);
+                    up('stat-drink-white', s.drinks_stats['Белое вино']);
+                    up('stat-drink-red', s.drinks_stats['Красное вино']);
+                    up('stat-drink-whiskey', s.drinks_stats['Виски']);
+                    up('stat-drink-vodka', s.drinks_stats['Водка']);
+                    up('stat-drink-none', s.drinks_stats['Не пью алкоголь']);
+                }
+            } catch (e) {
+                console.warn('Статистика пока не доступна:', e);
+            }
+        }
+
         // Загружаем данные при открытии страницы
         loadData();
 
+        loadStats();
+
         // Автообновление каждые 30 секунд
         setInterval(loadData, 30000);
+        setInterval(loadStats, 30000);
     </script>
 </body>
 
