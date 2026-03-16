@@ -22,9 +22,19 @@ PORT = int(os.environ.get('PORT', 8000))
 print(f"Starting server on port {PORT}")
 
 def get_db_connection():
-    # Берем URL строго из переменной окружения, которую мы загрузили в main()
-    db_url = os.environ.get('DATABASE_URL')
-    return psycopg2.connect(db_url, connect_timeout=10)
+    try:
+        return psycopg2.connect(
+            database="postgres",
+            user="postgres.dxfnguweggcefslzgvzs",
+            password="tQ/5ShuHtg7FbgT", # Пиши пароль КАК ЕСТЬ (со слэшем)
+            host="aws-1-eu-central-1.pooler.supabase.com",
+            port=6543,
+            connect_timeout=10
+        )
+    except Exception as e:
+        print(f"ОШИБКА БАЗЫ: {e}")
+        return None
+
 
 
 class WeddingHandler(http.server.SimpleHTTPRequestHandler):
