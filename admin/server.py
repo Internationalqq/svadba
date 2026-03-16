@@ -22,12 +22,10 @@ PORT = int(os.environ.get('PORT', 8000))
 print(f"Starting server on port {PORT}")
 
 def get_db_connection():
-    # Твоя строка (с твоим текущим паролем)
-    db_url = "postgresql://postgres:tQ%2F5ShuHtg7FbgT@db.dxfnguweggcefslzgvzs.supabase.co:5432/postgres"
-    
-    # Убираем try/except, чтобы ошибка НЕ проглатывалась
-    print("Попытка подключения к базе...")
+    # Берем URL строго из переменной окружения, которую мы загрузили в main()
+    db_url = os.environ.get('DATABASE_URL')
     return psycopg2.connect(db_url, connect_timeout=10)
+
 
 class WeddingHandler(http.server.SimpleHTTPRequestHandler):
     
