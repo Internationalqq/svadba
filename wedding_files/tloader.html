@@ -643,7 +643,7 @@
                         присутствие на мероприятии до:</div>
                     <div class="sm-questionnaire__date item-animation item-aright">
                         <span data-sm-bday="">01</span>.
-                        <span data-sm-bmonth="">05</span>.
+                        <span data-sm-bmonth="">04</span>.
                         <span data-sm-bfyear="">2026</span>
                     </div>
                 </div>
@@ -657,47 +657,38 @@
 
                         <div class="sm-form__block companion-group">
                             <div class="sm-form__block__title">Если вы придете не один, напишите имя второго гостя</div>
-                            <input class="sm-form__input" type="text"
-                                placeholder="Имя и фамилия второго гостя (необязательно)" name="companion">
+                            <input class="sm-form__input" type="text" placeholder="Имя и фамилия второго гостя (необязательно)" name="companion">
                             <div class="companion-drinks-wrapper" id="companion-drinks-block" style="display: none;">
-                                <div class="sm-form__block__title"
-                                    style="margin-bottom: 15px; font-size: 0.9em; opacity: 0.8;">Предпочтения по
-                                    напиткам для второго гостя</div>
+                                <div class="sm-form__block__title" style="margin-bottom: 15px; font-size: 0.9em; opacity: 0.8;">Предпочтения по напиткам для второго гостя</div>
                                 <div class="sm-form__drinks">
                                     <div class="sm-form__drinks-check" data-sm-anketa="1">
                                         <label class="sm-form_checkbox">
-                                            <input class="sm-form_checkbox_input" type="checkbox" id="companion_alco10"
-                                                name="companion_alco[]" value="1">
+                                            <input class="sm-form_checkbox_input" type="checkbox" id="companion_alco10" name="companion_alco[]" value="1">
                                             <span class="sm-form_checkbox_box"></span>
                                             <div data-sm-alcoitem="">Шампанское</div>
                                         </label>
                                         <label class="sm-form_checkbox">
-                                            <input class="sm-form_checkbox_input" type="checkbox" id="companion_alco20"
-                                                name="companion_alco[]" value="2">
+                                            <input class="sm-form_checkbox_input" type="checkbox" id="companion_alco20" name="companion_alco[]" value="2">
                                             <span class="sm-form_checkbox_box"></span>
                                             <div data-sm-alcoitem="">Белое вино</div>
                                         </label>
                                         <label class="sm-form_checkbox">
-                                            <input class="sm-form_checkbox_input" type="checkbox" id="companion_alco30"
-                                                name="companion_alco[]" value="3">
+                                            <input class="sm-form_checkbox_input" type="checkbox" id="companion_alco30" name="companion_alco[]" value="3">
                                             <span class="sm-form_checkbox_box"></span>
                                             <div data-sm-alcoitem="">Красное вино</div>
                                         </label>
                                         <label class="sm-form_checkbox">
-                                            <input class="sm-form_checkbox_input" type="checkbox" id="companion_alco40"
-                                                name="companion_alco[]" value="4">
+                                            <input class="sm-form_checkbox_input" type="checkbox" id="companion_alco40" name="companion_alco[]" value="4">
                                             <span class="sm-form_checkbox_box"></span>
                                             <div data-sm-alcoitem="">Виски</div>
                                         </label>
                                         <label class="sm-form_checkbox">
-                                            <input class="sm-form_checkbox_input" type="checkbox" id="companion_alco50"
-                                                name="companion_alco[]" value="5">
+                                            <input class="sm-form_checkbox_input" type="checkbox" id="companion_alco50" name="companion_alco[]" value="5">
                                             <span class="sm-form_checkbox_box"></span>
                                             <div data-sm-alcoitem="">Водка</div>
                                         </label>
                                         <label class="sm-form_checkbox">
-                                            <input class="sm-form_checkbox_input" type="checkbox" id="companion_alco80"
-                                                name="companion_alco[]" value="8">
+                                            <input class="sm-form_checkbox_input" type="checkbox" id="companion_alco80" name="companion_alco[]" value="8">
                                             <span class="sm-form_checkbox_box"></span>
                                             <div data-sm-alcoitem="">Не пью алкоголь</div>
                                         </label>
@@ -1185,32 +1176,27 @@
             margin: 15px 0 !important;
             box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1) !important;
         }
-
         .companion-group .sm-form__block__title {
             margin-bottom: 15px !important;
         }
-
         .companion-group .sm-form__input {
             margin-bottom: 0 !important;
         }
-
         .companion-drinks-wrapper {
             transition: all 0.3s ease-in-out !important;
             border-top: 1px solid rgba(255, 255, 255, 0.2) !important;
             margin-top: 20px !important;
             padding-top: 20px !important;
         }
-
+        
         /* Кружок date-active.svg поверх даты 6 в календаре */
         .sm-datetime {
             --date-active: url("./img/date-active.svg");
         }
-
         .sm-calendar .sm-number-active {
             position: relative;
             z-index: 2;
         }
-
         .sm-calendar .sm-number-active::before {
             content: "";
             position: absolute;
@@ -1230,7 +1216,6 @@
             background: #f21430;
             z-index: -1;
         }
-
         @media (max-width: 500px) {
             .sm-calendar .sm-number-active::before {
                 width: 42px;
@@ -1506,7 +1491,7 @@
                     if (companionInput && companionInput.value && companionInput.value.trim()) {
                         data.companion = companionInput.value.trim();
                     }
-
+                    
                     // Добавляем алкоголь второго гостя (если выбран) - независимо от того, указано имя или нет
                     const companionDrinkInputs = formContainer.querySelectorAll('input[name="companion_alco[]"]:checked');
                     const companionDrinks = [];
@@ -1627,7 +1612,7 @@
                 const companionInput = formContainer.querySelector('input[name="companion"]');
                 const companionDrinksBlock = formContainer.querySelector('#companion-drinks-block');
                 if (companionInput && companionDrinksBlock) {
-                    companionInput.addEventListener('input', function () {
+                    companionInput.addEventListener('input', function() {
                         if (this.value && this.value.trim()) {
                             companionDrinksBlock.style.display = 'block';
                             // Плавное появление
@@ -1648,7 +1633,7 @@
                         }
                     });
                 }
-
+                
                 // Убираем ошибки при вводе
                 const inputs = formContainer.querySelectorAll('input');
                 inputs.forEach(input => {

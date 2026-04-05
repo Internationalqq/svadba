@@ -133,10 +133,6 @@
             background: linear-gradient(135deg, #68d391 0%, #48bb78 100%);
         }
 
-        #drinks-stats .drink-item:nth-child(6) {
-            background: linear-gradient(135deg, #230313 0%, #0b0007 100%);
-        }
-
         .stat-card:nth-child(2) {
             background: linear-gradient(135deg, #48bb78 0%, #38a169 100%);
             box-shadow: 0 4px 15px rgba(72, 187, 120, 0.4);
@@ -383,66 +379,107 @@
     <script>
         async function loadData() {
             try {
-                const res = await fetch('/admin/api/responses');
-                if (!res.ok) throw new Error('Ошибка сервера');
-                const data = await res.json();
+                // Загружаем только ответы (статистику считаем второстепенной, чтобы не блокировать таблицу)
+                const responsesResponse = await fetch('/admin/api/responses');
 
-                // --- САМА СЧИТАЕТ СТАТИСТИКУ ИЗ ДАННЫХ ТАБЛИЦЫ ---
-                let stats = { total: data.length, coming: 0, notComing: 0, bus: 0, drinks: {} };
+                if (!responsesResponse.ok) {
+                    const errorText = await responsesResponse.text();
+                    throw new Error(`HTTP ${responsesResponse.status}: ${errorText}`);
+                }
+                const responsesData = await responsesResponse.json();
 
-                data.forEach(row => {
-                    // Считаем пришедших (гость + напарник)
-                    if (row.attendance && row.attendance.includes('удовольствием')) {
-                        stats.coming += 1;
-                        if (row.companion && row.companion.trim()) stats.coming += 1;
-                    } else {
-                        stats.notComing += 1;
-                    }
-                    // Считаем автобус
-                    if (row.bus_option && !row.bus_option.includes('Нет')) stats.bus += 1;
-
-                    // Считаем напитки (простой обход строк)
-                    [row.drinks, row.companion_drinks].forEach(d => {
-                        if (d) d.split(',').forEach(drink => {
-                            const name = drink.trim();
-                            stats.drinks[name] = (stats.drinks[name] || 0) + 1;
-                        });
+                // Проверяем, что ответ является массивом
+                let responses = [];
+                if (Array.isArray(responsesData)) {
+                    responses = responsesData;
+                    // Логируем для отладки
+                    responses.forEach((row, index) => {
+                        if (row.companion_drinks) {
+                            console.log(`Response ${index}: companion_drinks =`, row.companion_drinks);
+                        }
                     });
-                });
+                } else if (responsesData && responsesData.error) {
+                    throw new Error(responsesData.message || 'Ошибка получения данных');
+                } else {
+                    console.warn('Unexpected response format:', responsesData);
+                    responses = [];
+                }
 
-                // --- ОБНОВЛЯЕМ КАРТОЧКИ (МГНОВЕННО) ---
-                const up = (id, val) => { if (document.getElementById(id)) document.getElementById(id).textContent = val || 0; };
-                up('stat-total', stats.total);
-                up('stat-coming', stats.coming);
-                up('stat-not-coming', stats.notComing);
-                up('stat-bus', stats.bus);
-                up('stat-drink-champagne', stats.drinks['Шампанское']);
-                up('stat-drink-white', stats.drinks['Белое вино']);
-                up('stat-drink-red', stats.drinks['Красное вино']);
-                up('stat-drink-whiskey', stats.drinks['Виски']);
-                up('stat-drink-vodka', stats.drinks['Водка']);
-                up('stat-drink-none', stats.drinks['Не пью алкоголь']);
-
-                // --- РИСУЕМ ТАБЛИЦУ (Твой старый код) ---
                 const tbody = document.getElementById('table-body');
                 tbody.innerHTML = '';
-                if (data.length === 0) {
+
+                if (responses.length === 0) {
                     document.getElementById('empty').style.display = 'block';
                     document.getElementById('responses-table').style.display = 'none';
                 } else {
                     document.getElementById('empty').style.display = 'none';
                     document.getElementById('responses-table').style.display = 'table';
-                    data.forEach(row => {
+
+                    responses.forEach(row => {
                         const tr = document.createElement('tr');
-                        tr.innerHTML = `<td>#${row.id}</td><td>${row.name}</td><td>${row.companion || '-'}</td><td>${row.attendance.includes('Да') ? '✅' : '❌'}</td><td>${row.bus_option}</td><td>${row.drinks}</td><td>${row.companion_drinks || '-'}</td><td>${new Date(row.created_at).toLocaleString()}</td><td><button onclick="deleteRecord(${row.id}, '${row.name}')">🗑️</button></td>`;
+
+                        const isAttending = row.attendance && row.attendance.includes('удовольствием');
+                        const badge = isAttending
+                            ? '<span class="badge badge-yes">✓ Да</span>'
+                            : '<span class="badge badge-no">✗ Нет</span>';
+
+                        const date = new Date(row.created_at);
+                        const formattedDate = date.toLocaleString('ru-RU', {
+                            day: '2-digit',
+                            month: '2-digit',
+                            year: 'numeric',
+                            hour: '2-digit',
+                            minute: '2-digit'
+                        });
+
+                        // Логируем для отладки
+                        if (row.companion_drinks) {
+                            console.log(`Row ${row.id}: companion_drinks =`, row.companion_drinks);
+                        }
+
+                        tr.innerHTML = `
+                            <td><strong>#${row.id}</strong></td>
+                            <td><strong>${row.name || '-'}</strong></td>
+                            <td>${row.companion || '-'}</td>
+                            <td>${badge}</td>
+                            <td>${row.bus_option || '-'}</td>
+                            <td>${row.drinks || '-'}</td>
+                            <td>${(row.companion_drinks && row.companion_drinks.trim()) ? row.companion_drinks : '-'}</td>
+                            <td>${formattedDate}</td>
+                            <td>
+                                <button class="btn-delete" onclick="deleteRecord(${row.id}, '${(row.name || '').replace(/'/g, "\\'")}')" title="Удалить запись">
+                                    🗑️ Удалить
+                                </button>
+                            </td>
+                        `;
+
                         tbody.appendChild(tr);
                     });
                 }
-            } catch (e) {
-                console.error(e);
-            } finally {
+
                 document.getElementById('loading').style.display = 'none';
                 document.getElementById('content').style.display = 'block';
+
+            } catch (error) {
+                console.error('Error loading data:', error);
+                let errorMessage = error.message || 'Неизвестная ошибка';
+
+                if (error.message && error.message.includes('Failed to fetch')) {
+                    errorMessage = 'Не удалось подключиться к серверу. Убедитесь, что сервер запущен и доступен.';
+                }
+
+                document.getElementById('loading').innerHTML = `
+                    <div style="color: #f56565; padding: 20px; text-align: center;">
+                        <div style="font-size: 48px; margin-bottom: 10px;">❌</div>
+                        <h3 style="color: #c53030; margin-bottom: 10px;">Ошибка загрузки данных</h3>
+                        <p style="color: #666; margin-bottom: 15px;">${errorMessage}</p>
+                        <button onclick="loadData()" class="btn" style="margin-top: 10px;">🔄 Попробовать снова</button>
+                        <details style="margin-top: 15px; text-align: left; max-width: 600px; margin-left: auto; margin-right: auto;">
+                            <summary style="cursor: pointer; color: #667eea;">Детали ошибки</summary>
+                            <pre style="background: #f7fafc; padding: 10px; border-radius: 5px; margin-top: 10px; overflow-x: auto; font-size: 12px;">${error.stack || JSON.stringify(error, null, 2)}</pre>
+                        </details>
+                    </div>
+                `;
             }
         }
 

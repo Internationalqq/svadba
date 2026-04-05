@@ -1,0 +1,21 @@
+# Путь /opt/svadba — типичный каталог клона на VPS. Если репозиторий в другом месте,
+# отредактируйте WorkingDirectory, EnvironmentFile и ExecStart перед установкой.
+[Unit]
+Description=Wedding site admin API (Python server.py)
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+WorkingDirectory=/opt/svadba/admin
+Environment=PYTHONUNBUFFERED=1
+EnvironmentFile=/opt/svadba/admin/.env
+ExecStart=/usr/bin/python3 /opt/svadba/admin/server.py
+Restart=always
+RestartSec=5
+
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=multi-user.target
