@@ -377,9 +377,63 @@
     </div>
 
     <script>
+        /** Та же логика, что в server.py get_stats(), но по уже загруженным строкам */
+        function applyStatsFromResponses(responses) {
+            const drinksStats = {
+                'Шампанское': 0,
+                'Белое вино': 0,
+                'Красное вино': 0,
+                'Виски': 0,
+                'Водка': 0,
+                'Не пью алкоголь': 0
+            };
+            let coming = 0;
+            let notComing = 0;
+            let busUsers = 0;
+
+            function addDrinks(str) {
+                if (!str || typeof str !== 'string') return;
+                str.split(',').forEach(function (part) {
+                    const d = part.trim();
+                    if (Object.prototype.hasOwnProperty.call(drinksStats, d)) {
+                        drinksStats[d]++;
+                    }
+                });
+            }
+
+            responses.forEach(function (row) {
+                const att = row.attendance || '';
+                if (att.indexOf('удовольствием') !== -1) {
+                    coming += 1;
+                    if (row.companion && String(row.companion).trim()) {
+                        coming += 1;
+                    }
+                }
+                if (att.indexOf('Не смогу') !== -1) {
+                    notComing += 1;
+                }
+                const bus = (row.bus_option && String(row.bus_option).trim()) || '';
+                if (bus && bus.indexOf('Нет, доберусь') === -1 && bus !== 'no') {
+                    busUsers += 1;
+                }
+                addDrinks(row.drinks);
+                addDrinks(row.companion_drinks);
+            });
+
+            document.getElementById('stat-total').textContent = responses.length;
+            document.getElementById('stat-coming').textContent = coming;
+            document.getElementById('stat-not-coming').textContent = notComing;
+            document.getElementById('stat-bus').textContent = busUsers;
+            document.getElementById('stat-drink-champagne').textContent = drinksStats['Шампанское'];
+            document.getElementById('stat-drink-white').textContent = drinksStats['Белое вино'];
+            document.getElementById('stat-drink-red').textContent = drinksStats['Красное вино'];
+            document.getElementById('stat-drink-whiskey').textContent = drinksStats['Виски'];
+            document.getElementById('stat-drink-vodka').textContent = drinksStats['Водка'];
+            document.getElementById('stat-drink-none').textContent = drinksStats['Не пью алкоголь'];
+        }
+
         async function loadData() {
             try {
-                // Загружаем только ответы (статистику считаем второстепенной, чтобы не блокировать таблицу)
                 const responsesResponse = await fetch('/admin/api/responses');
 
                 if (!responsesResponse.ok) {
@@ -456,6 +510,8 @@
                         tbody.appendChild(tr);
                     });
                 }
+
+                applyStatsFromResponses(responses);
 
                 document.getElementById('loading').style.display = 'none';
                 document.getElementById('content').style.display = 'block';
