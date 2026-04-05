@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <!-- saved from url=(0050)https://wedwed.ru/sitemaker/tloader.php?needauth=1 -->
 <html lang="ru" class="animating">
 
@@ -643,7 +643,7 @@
                         присутствие на мероприятии до:</div>
                     <div class="sm-questionnaire__date item-animation item-aright">
                         <span data-sm-bday="">01</span>.
-                        <span data-sm-bmonth="">04</span>.
+                        <span data-sm-bmonth="">05</span>.
                         <span data-sm-bfyear="">2026</span>
                     </div>
                 </div>
@@ -653,48 +653,6 @@
                             <div class="sm-form__block__title">Ваше Имя и Фамилия</div>
                             <input class="sm-form__input" type="text" placeholder="Ваше имя и фамилия" name="name"
                                 data-sm-anketa-name="" required>
-                        </div>
-
-                        <div class="sm-form__block companion-group">
-                            <div class="sm-form__block__title">Если вы придете не один, напишите имя второго гостя</div>
-                            <input class="sm-form__input" type="text" placeholder="Имя и фамилия второго гостя (необязательно)" name="companion">
-                            <div class="companion-drinks-wrapper" id="companion-drinks-block" style="display: none;">
-                                <div class="sm-form__block__title" style="margin-bottom: 15px; font-size: 0.9em; opacity: 0.8;">Предпочтения по напиткам для второго гостя</div>
-                                <div class="sm-form__drinks">
-                                    <div class="sm-form__drinks-check" data-sm-anketa="1">
-                                        <label class="sm-form_checkbox">
-                                            <input class="sm-form_checkbox_input" type="checkbox" id="companion_alco10" name="companion_alco[]" value="1">
-                                            <span class="sm-form_checkbox_box"></span>
-                                            <div data-sm-alcoitem="">Шампанское</div>
-                                        </label>
-                                        <label class="sm-form_checkbox">
-                                            <input class="sm-form_checkbox_input" type="checkbox" id="companion_alco20" name="companion_alco[]" value="2">
-                                            <span class="sm-form_checkbox_box"></span>
-                                            <div data-sm-alcoitem="">Белое вино</div>
-                                        </label>
-                                        <label class="sm-form_checkbox">
-                                            <input class="sm-form_checkbox_input" type="checkbox" id="companion_alco30" name="companion_alco[]" value="3">
-                                            <span class="sm-form_checkbox_box"></span>
-                                            <div data-sm-alcoitem="">Красное вино</div>
-                                        </label>
-                                        <label class="sm-form_checkbox">
-                                            <input class="sm-form_checkbox_input" type="checkbox" id="companion_alco40" name="companion_alco[]" value="4">
-                                            <span class="sm-form_checkbox_box"></span>
-                                            <div data-sm-alcoitem="">Виски</div>
-                                        </label>
-                                        <label class="sm-form_checkbox">
-                                            <input class="sm-form_checkbox_input" type="checkbox" id="companion_alco50" name="companion_alco[]" value="5">
-                                            <span class="sm-form_checkbox_box"></span>
-                                            <div data-sm-alcoitem="">Водка</div>
-                                        </label>
-                                        <label class="sm-form_checkbox">
-                                            <input class="sm-form_checkbox_input" type="checkbox" id="companion_alco80" name="companion_alco[]" value="8">
-                                            <span class="sm-form_checkbox_box"></span>
-                                            <div data-sm-alcoitem="">Не пью алкоголь</div>
-                                        </label>
-                                    </div>
-                                </div>
-                            </div>
                         </div>
 
                         <div class="sm-form__block">
@@ -753,12 +711,6 @@
                             </div>
                             <div class="sm-form__drinks">
                                 <div class="sm-form__drinks-check" data-sm-anketa="1">
-                                    <label class="sm-form_checkbox ct-alcotpl">
-                                        <input class="sm-form_checkbox_input" type="checkbox" id="" name="alco[]"
-                                            value="">
-                                        <span class="sm-form_checkbox_box"></span>
-                                        <div data-sm-alcoitem=""></div>
-                                    </label>
                                     <label class="sm-form_checkbox">
                                         <input class="sm-form_checkbox_input" type="checkbox" id="alco10" name="alco[]"
                                             value="1">
@@ -1165,483 +1117,53 @@
         .sm-form__block__title {
             font-family: "SMHeadersFont", sans-serif !important;
         }
-
-        /* Стили для объединенного блока второго гостя */
-        .companion-group {
-            transition: all 0.3s ease !important;
-            background: rgba(255, 255, 255, 0.08) !important;
-            border: 2px solid rgba(255, 255, 255, 0.3) !important;
-            border-radius: 12px !important;
-            padding: 20px !important;
-            margin: 15px 0 !important;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1) !important;
-        }
-        .companion-group .sm-form__block__title {
-            margin-bottom: 15px !important;
-        }
-        .companion-group .sm-form__input {
-            margin-bottom: 0 !important;
-        }
-        .companion-drinks-wrapper {
-            transition: all 0.3s ease-in-out !important;
-            border-top: 1px solid rgba(255, 255, 255, 0.2) !important;
-            margin-top: 20px !important;
-            padding-top: 20px !important;
-        }
-        
-        /* Кружок date-active.svg поверх даты 6 в календаре */
-        .sm-datetime {
-            --date-active: url("./img/date-active.svg");
-        }
-        .sm-calendar .sm-number-active {
-            position: relative;
-            z-index: 2;
-        }
-        .sm-calendar .sm-number-active::before {
-            content: "";
-            position: absolute;
-            left: 50%;
-            top: 50%;
-            transform: translate(-50%, -50%);
-            width: 83px;
-            height: 73px;
-            mask: var(--date-active);
-            -webkit-mask: var(--date-active);
-            mask-size: 100% auto;
-            -webkit-mask-size: 100% auto;
-            mask-repeat: no-repeat;
-            -webkit-mask-repeat: no-repeat;
-            mask-position: center;
-            -webkit-mask-position: center;
-            background: #f21430;
-            z-index: -1;
-        }
-        @media (max-width: 500px) {
-            .sm-calendar .sm-number-active::before {
-                width: 42px;
-                height: 40px;
-            }
-        }
     </style>
-
-    <style>
-        /* Стили для уведомлений и загрузки */
-        .form-message {
-            position: fixed;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            background: white;
-            padding: 30px 40px;
-            border-radius: 15px;
-            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
-            z-index: 10000001;
-            text-align: center;
-            min-width: 300px;
-            max-width: 90%;
-            display: none;
-            animation: fadeIn 0.3s ease;
-        }
-
-        .form-message.show {
-            display: block;
-        }
-
-        .form-message.success {
-            border-top: 4px solid #48bb78;
-        }
-
-        .form-message.error {
-            border-top: 4px solid #f56565;
-        }
-
-        .form-message.loading {
-            border-top: 4px solid #667eea;
-        }
-
-        .form-message-icon {
-            font-size: 48px;
-            margin-bottom: 15px;
-        }
-
-        .form-message-title {
-            font-size: 20px;
-            font-weight: bold;
-            margin-bottom: 10px;
-            color: #333;
-        }
-
-        .form-message-text {
-            font-size: 16px;
-            color: #666;
-            line-height: 1.5;
-        }
-
-        .form-message-btn {
-            margin-top: 20px;
-            padding: 10px 30px;
-            background: #667eea;
-            color: white;
-            border: none;
-            border-radius: 8px;
-            cursor: pointer;
-            font-size: 16px;
-            font-weight: 600;
-            transition: background 0.3s;
-        }
-
-        .form-message-btn:hover {
-            background: #5568d3;
-        }
-
-        @keyframes fadeIn {
-            from {
-                opacity: 0;
-                transform: translate(-50%, -50%) scale(0.9);
-            }
-
-            to {
-                opacity: 1;
-                transform: translate(-50%, -50%) scale(1);
-            }
-        }
-
-        @keyframes spin {
-            to {
-                transform: rotate(360deg);
-            }
-        }
-
-        .spinner {
-            display: inline-block;
-            animation: spin 1s linear infinite;
-            font-size: 32px;
-        }
-
-        .form-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: rgba(0, 0, 0, 0.5);
-            z-index: 10000000;
-            display: none;
-        }
-
-        .form-overlay.show {
-            display: block;
-        }
-
-        .submit-btn-loading {
-            opacity: 0.6;
-            pointer-events: none;
-            position: relative;
-        }
-
-        .submit-btn-loading::after {
-            content: '';
-            position: absolute;
-            width: 20px;
-            height: 20px;
-            top: 50%;
-            left: 50%;
-            margin-left: -10px;
-            margin-top: -10px;
-            border: 2px solid #ffffff;
-            border-radius: 50%;
-            border-top-color: transparent;
-            animation: spin 0.8s linear infinite;
-        }
-
-        .field-error {
-            border-bottom-color: #f56565 !important;
-            color: #f56565 !important;
-        }
-    </style>
-
-    <div class="form-overlay" id="formOverlay"></div>
-    <div class="form-message" id="formMessage">
-        <div class="form-message-icon" id="messageIcon"></div>
-        <div class="form-message-title" id="messageTitle"></div>
-        <div class="form-message-text" id="messageText"></div>
-        <button class="form-message-btn" id="messageBtn" onclick="closeMessage()">OK</button>
-    </div>
 
     <script>
-        // Функция показа сообщения
-        function showMessage(type, title, text, autoClose = false) {
-            const message = document.getElementById('formMessage');
-            const overlay = document.getElementById('formOverlay');
-            const icon = document.getElementById('messageIcon');
-            const titleEl = document.getElementById('messageTitle');
-            const textEl = document.getElementById('messageText');
-            const btn = document.getElementById('messageBtn');
-
-            // Убираем все классы типов
-            message.classList.remove('success', 'error', 'loading');
-            message.classList.add(type);
-
-            // Устанавливаем контент
-            if (type === 'loading') {
-                icon.innerHTML = '<span class="spinner">⏳</span>';
-                titleEl.textContent = 'Отправка...';
-                textEl.textContent = 'Пожалуйста, подождите';
-                btn.style.display = 'none';
-            } else if (type === 'success') {
-                icon.innerHTML = '✅';
-                titleEl.textContent = title || 'Успешно!';
-                textEl.textContent = text || 'Ваши данные сохранены';
-                btn.style.display = 'block';
-            } else {
-                icon.innerHTML = '❌';
-                titleEl.textContent = title || 'Ошибка';
-                textEl.textContent = text || 'Произошла ошибка';
-                btn.style.display = 'block';
-            }
-
-            // Показываем
-            overlay.classList.add('show');
-            message.classList.add('show');
-
-            // Автозакрытие для успеха
-            if (autoClose && type === 'success') {
-                setTimeout(() => {
-                    closeMessage();
-                    // Закрываем модальное окно
-                    const modal = document.querySelector('.sm-questionnaire');
-                    if (modal) {
-                        modal.classList.remove('sm-open');
-                        document.body.classList.remove('lock');
-                    }
-                }, 2000);
-            }
-        }
-
-        function closeMessage() {
-            document.getElementById('formOverlay').classList.remove('show');
-            document.getElementById('formMessage').classList.remove('show');
-        }
-
-        // Валидация формы
-        function validateForm(formContainer) {
-            let isValid = true;
-            const errors = [];
-
-            // Проверка имени - ищем по name или data-sm-anketa-name
-            const nameInput = formContainer.querySelector('input[name="name"]') || formContainer.querySelector('input[data-sm-anketa-name]');
-            if (!nameInput || !nameInput.value || !nameInput.value.trim()) {
-                isValid = false;
-                errors.push('Пожалуйста, укажите ваше имя');
-                if (nameInput) {
-                    nameInput.classList.add('field-error');
-                }
-            } else {
-                if (nameInput) nameInput.classList.remove('field-error');
-            }
-
-            // Проверка выбора (придет/не придет)
-            const choiceInputs = formContainer.querySelectorAll('input[name="choice"]');
-            let choiceSelected = false;
-            choiceInputs.forEach(input => {
-                if (input.checked) choiceSelected = true;
-            });
-
-            if (!choiceSelected) {
-                isValid = false;
-                errors.push('Пожалуйста, выберите, приедете ли вы на свадьбу');
-            }
-
-            return { isValid, errors };
-        }
-
-        // Отправка данных формы в базу данных
+        // Отправка в /admin/api/save как application/x-www-form-urlencoded (как ждёт server.py)
         document.addEventListener('DOMContentLoaded', function () {
             const formContainer = document.querySelector('.sm-questionnaire__form');
-            const form = formContainer ? formContainer.querySelector('form.sm-form') : null;
-            const submitBtn = document.querySelector('[data-sm-anketa-send]');
+            const submitBtns = document.querySelectorAll('[data-sm-anketa-send]');
 
-            if (submitBtn && formContainer) {
-                submitBtn.addEventListener('click', function (e) {
+            function wireSubmit(btn) {
+                if (!btn || !formContainer) return;
+                btn.addEventListener('click', function (e) {
                     e.preventDefault();
-
-                    // Валидация (используем formContainer для поиска элементов)
-                    const validation = validateForm(formContainer);
-                    if (!validation.isValid) {
-                        showMessage('error', 'Ошибка валидации', validation.errors.join('<br>'));
-                        return;
-                    }
-
-                    // Блокируем кнопку и показываем загрузку
-                    submitBtn.classList.add('submit-btn-loading');
-                    submitBtn.disabled = true;
-                    showMessage('loading');
-
-                    // Собираем данные формы (используем formContainer для поиска)
-                    const data = {};
-
-                    // Добавляем имя
-                    const nameInput = formContainer.querySelector('input[name="name"]') || formContainer.querySelector('input[data-sm-anketa-name]');
-                    if (nameInput && nameInput.value) {
-                        data.name = nameInput.value.trim();
-                    }
-
-                    // Добавляем второго гостя (если указан)
-                    const companionInput = formContainer.querySelector('input[name="companion"]');
-                    if (companionInput && companionInput.value && companionInput.value.trim()) {
-                        data.companion = companionInput.value.trim();
-                    }
-                    
-                    // Добавляем алкоголь второго гостя (если выбран) - независимо от того, указано имя или нет
-                    const companionDrinkInputs = formContainer.querySelectorAll('input[name="companion_alco[]"]:checked');
-                    const companionDrinks = [];
-                    companionDrinkInputs.forEach(input => {
-                        companionDrinks.push(input.value);
-                    });
-                    console.log('Companion drinks inputs found:', companionDrinkInputs.length);
-                    console.log('Companion drinks selected:', companionDrinks);
-                    if (companionDrinks.length > 0) {
-                        data['companion_alco[]'] = companionDrinks;
-                        console.log('Companion drinks added to data:', data['companion_alco[]']);
-                    } else {
-                        console.log('No companion drinks selected');
-                    }
-
-                    // Добавляем выбор (придет/не придет)
-                    const choiceInput = formContainer.querySelector('input[name="choice"]:checked');
-                    if (choiceInput) {
-                        data.choice = choiceInput.value;
-                    }
-
-                    // Добавляем автобус
-                    const busInput = formContainer.querySelector('input[name="bus"]:checked');
-                    if (busInput) {
-                        data.bus = busInput.value;
-                    }
-
-                    // Добавляем напитки
-                    const drinkInputs = formContainer.querySelectorAll('input[name="alco[]"]:checked');
-                    const drinks = [];
-                    drinkInputs.forEach(input => {
-                        drinks.push(input.value);
-                    });
-                    if (drinks.length > 0) {
-                        data['alco[]'] = drinks;
-                    }
-
-                    // Формируем URL-encoded строку
+                    const nameInput = formContainer.querySelector('input[name="name"]');
+                    const name = nameInput ? nameInput.value.trim() : '';
+                    const choice = formContainer.querySelector('input[name="choice"]:checked');
+                    const bus = formContainer.querySelector('input[name="bus"]:checked');
                     const params = new URLSearchParams();
-                    Object.keys(data).forEach(key => {
-                        if (Array.isArray(data[key])) {
-                            data[key].forEach(val => params.append(key, val));
-                        } else {
-                            params.append(key, data[key]);
-                        }
+                    params.set('name', name);
+                    if (choice) params.set('choice', choice.value);
+                    if (bus) params.set('bus', bus.value);
+                    formContainer.querySelectorAll('input[name="alco[]"]:checked').forEach(function (inp) {
+                        if (inp.value) params.append('alco[]', inp.value);
                     });
-                    console.log('Final data being sent:', data);
-                    console.log('Final params:', params.toString());
 
-                    // Отправляем на сервер
                     fetch('/admin/api/save', {
                         method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8'
-                        },
+                        headers: { 'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8' },
                         body: params.toString()
                     })
-                        .then(async response => {
-                            // Получаем текст ответа для отладки
-                            const responseText = await response.text();
-                            console.log('Server response:', responseText);
-
-                            if (!response.ok) {
-                                throw new Error(`HTTP error! status: ${response.status}`);
-                            }
-
-                            // Парсим JSON
-                            try {
-                                return JSON.parse(responseText);
-                            } catch (e) {
-                                console.error('JSON parse error:', e);
-                                console.error('Response text:', responseText);
-                                throw new Error('Неверный формат ответа от сервера');
-                            }
-                        })
-                        .then(data => {
-                            console.log('Parsed data:', data);
-                            submitBtn.classList.remove('submit-btn-loading');
-                            submitBtn.disabled = false;
-
-                            if (data && data.success) {
-                                showMessage('success', 'Спасибо!', 'Ваши данные успешно сохранены. Мы будем рады видеть вас на нашей свадьбе! 💕', true);
-                                // Очищаем форму
-                                if (form && typeof form.reset === 'function') {
-                                    form.reset();
-                                } else {
-                                    // Очищаем поля вручную
-                                    const inputs = formContainer.querySelectorAll('input[type="text"], input[type="radio"], input[type="checkbox"]');
-                                    inputs.forEach(input => {
-                                        if (input.type === 'radio' || input.type === 'checkbox') {
-                                            input.checked = false;
-                                        } else {
-                                            input.value = '';
-                                        }
-                                    });
-                                }
+                        .then(function (r) { return r.json(); })
+                        .then(function (data) {
+                            if (data.success) {
+                                alert('Спасибо! Ваши данные сохранены.');
+                                var q = document.querySelector('.sm-questionnaire');
+                                if (q) q.classList.remove('sm-open');
+                                document.body.classList.remove('lock');
                             } else {
-                                showMessage('error', 'Ошибка сохранения', data?.message || 'Не удалось сохранить данные. Пожалуйста, попробуйте еще раз.');
+                                alert('Ошибка: ' + (data.message || ''));
                             }
                         })
-                        .catch(error => {
-                            console.error('Error:', error);
-                            submitBtn.classList.remove('submit-btn-loading');
-                            submitBtn.disabled = false;
-
-                            let errorText = 'Произошла ошибка при отправке данных.';
-                            if (error.message.includes('Failed to fetch')) {
-                                errorText = 'Не удалось подключиться к серверу. Убедитесь что сервер запущен (python admin/server.py)';
-                            } else if (error.message.includes('JSON')) {
-                                errorText = 'Ошибка обработки ответа сервера. Данные могут быть сохранены, проверьте админ-панель.';
-                            }
-
-                            showMessage('error', 'Ошибка подключения', errorText);
+                        .catch(function (err) {
+                            console.error(err);
+                            alert('Произошла ошибка при отправке данных.');
                         });
                 });
-
-                // Показываем/скрываем блок выбора алкоголя для второго гостя
-                const companionInput = formContainer.querySelector('input[name="companion"]');
-                const companionDrinksBlock = formContainer.querySelector('#companion-drinks-block');
-                if (companionInput && companionDrinksBlock) {
-                    companionInput.addEventListener('input', function() {
-                        if (this.value && this.value.trim()) {
-                            companionDrinksBlock.style.display = 'block';
-                            // Плавное появление
-                            companionDrinksBlock.style.opacity = '0';
-                            companionDrinksBlock.style.transition = 'opacity 0.3s ease-in-out';
-                            setTimeout(() => {
-                                companionDrinksBlock.style.opacity = '1';
-                            }, 10);
-                        } else {
-                            // Плавное исчезновение
-                            companionDrinksBlock.style.opacity = '0';
-                            setTimeout(() => {
-                                companionDrinksBlock.style.display = 'none';
-                            }, 300);
-                            // Сбрасываем выбранные напитки второго гостя
-                            const companionDrinkInputs = companionDrinksBlock.querySelectorAll('input[type="checkbox"]');
-                            companionDrinkInputs.forEach(input => input.checked = false);
-                        }
-                    });
-                }
-                
-                // Убираем ошибки при вводе
-                const inputs = formContainer.querySelectorAll('input');
-                inputs.forEach(input => {
-                    input.addEventListener('input', function () {
-                        this.classList.remove('field-error');
-                    });
-                });
             }
+            submitBtns.forEach(wireSubmit);
         });
     </script>
 </body>
