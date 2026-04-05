@@ -209,12 +209,19 @@ def get_db_connection():
     return conn
 
 class WeddingHandler(http.server.SimpleHTTPRequestHandler):
-    
+    def _url_path(self):
+        """Путь без query string (иначе /admin/api/responses?v=1 не совпадает с маршрутом)."""
+        return urlparse(self.path).path
+
     def do_GET(self):
         """Обработка GET запросов"""
         try:
-            print(f"GET request: {self.path}")
-            if self.path == '/admin/api/responses':
+            p = self._url_path()
+            print(f"GET request: {self.path} (path={p})")
+            if p == '/admin/api/ping':
+                self.send_json_response({'ok': True})
+                return
+            if p == '/admin/api/responses':
                 print("Processing /admin/api/responses request...")
                 try:
                     responses = self.get_responses()
@@ -231,7 +238,7 @@ class WeddingHandler(http.server.SimpleHTTPRequestHandler):
                     print(f"Error in get_responses: {error_msg}")
                     # Возвращаем пустой массив при ошибке, чтобы не ломать фронтенд
                     self.send_json_response([])
-            elif self.path == '/admin/api/stats':
+            elif p == '/admin/api/stats':
                 print("Processing /admin/api/stats request...")
                 try:
                     stats = self.get_stats()
@@ -257,7 +264,7 @@ class WeddingHandler(http.server.SimpleHTTPRequestHandler):
                             'Не пью алкоголь': 0
                         }
                     })
-            elif self.path.startswith('/admin/api/export'):
+            elif p.startswith('/admin/api/export'):
                 self.export_to_csv()
             else:
                 # Обработка обычных файлов (HTML, CSS, JS)
@@ -280,7 +287,8 @@ class WeddingHandler(http.server.SimpleHTTPRequestHandler):
     
     def do_POST(self):
         """Обработка POST запросов"""
-        if self.path == '/admin/api/delete':
+        p = self._url_path()
+        if p == '/admin/api/delete':
             # Удаление записи
             try:
                 content_length = int(self.headers.get('Content-Length', 0))
@@ -305,14 +313,11 @@ class WeddingHandler(http.server.SimpleHTTPRequestHandler):
                     })
                     return
                 
-                # Инициализируем БД
-                self.init_database()
-                
-                # Удаляем из БД
                 conn = get_db_connection()
                 if conn is None:
                     raise Exception("get_db_connection() вернул None вместо объекта подключения")
                 cursor = conn.cursor()
+                cursor.execute("SET statement_timeout TO 5000")
                 cursor.execute('DELETE FROM responses WHERE id = %s', (record_id,))
                 deleted_count = cursor.rowcount
                 conn.commit()
@@ -340,7 +345,7 @@ class WeddingHandler(http.server.SimpleHTTPRequestHandler):
                     'success': False,
                     'message': f'Ошибка удаления: {error_msg}'
                 })
-        elif self.path == '/admin/api/save':
+        elif p == '/admin/api/save':
             try:
                 print(f"=== POST /admin/api/save ===")
                 content_length = int(self.headers.get('Content-Length', 0))
@@ -563,8 +568,6 @@ class WeddingHandler(http.server.SimpleHTTPRequestHandler):
         """Сохранение ответа в БД"""
         print(f"save_response called: name={name}, companion={companion}, attendance={attendance}, bus={bus}, drinks={drinks}, companion_drinks={companion_drinks}")
         try:
-            self.init_database()
-            print("Database initialized")
             conn = get_db_connection()
             if conn is None:
                 raise Exception("get_db_connection() вернул None вместо объекта подключения")
@@ -592,11 +595,11 @@ class WeddingHandler(http.server.SimpleHTTPRequestHandler):
     def get_responses(self):
         """Получение всех ответов"""
         try:
-            self.init_database()
             conn = get_db_connection()
             if conn is None:
                 raise Exception("get_db_connection() вернул None вместо объекта подключения")
             cursor = conn.cursor(cursor_factory=RealDictCursor)
+            cursor.execute("SET statement_timeout TO 8000")
             cursor.execute('SELECT * FROM responses ORDER BY created_at DESC')
             rows = cursor.fetchall()
             cursor.close()
@@ -624,7 +627,6 @@ class WeddingHandler(http.server.SimpleHTTPRequestHandler):
     def get_stats(self):
         """Получение статистики"""
         try:
-            self.init_database()
             conn = get_db_connection()
             if conn is None:
                 raise Exception("get_db_connection() вернул None вместо объекта подключения")
