@@ -1,12 +1,21 @@
 #!/usr/bin/env bash
 # Установка systemd-сервиса на VPS (Ubuntu).
-# Запуск из корня репозитория на сервере, например: cd /opt/svadba && sudo bash deploy/install-systemd.sh
+# Из папки admin НЕ запускайте «bash deploy/...» — файла там нет. Варианты:
+#   cd /opt/svadba && sudo bash deploy/install-systemd.sh
+#   sudo bash /opt/svadba/deploy/install-systemd.sh
 set -euo pipefail
 
-ROOT="$(cd "$(dirname "$0")/.." && pwd)"
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+ROOT="$(cd "${SCRIPT_DIR}/.." && pwd)"
 SERVICE_NAME="svadba-admin"
 SERVICE_SRC="${ROOT}/deploy/${SERVICE_NAME}.service"
 TARGET="/etc/systemd/system/${SERVICE_NAME}.service"
+
+if [[ ! -f "${SERVICE_SRC}" ]]; then
+  echo "Не найден ${SERVICE_SRC} (корень репозитория определился как ${ROOT})."
+  echo "Запустите: cd /opt/svadba && sudo bash deploy/install-systemd.sh"
+  exit 1
+fi
 
 if [[ "${EUID:-0}" -ne 0 ]]; then
   echo "Запустите с sudo: sudo bash deploy/install-systemd.sh"

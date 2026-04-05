@@ -11,6 +11,7 @@ import json
 import urllib.parse
 from datetime import datetime
 import os
+import sys
 import csv
 import io
 import psycopg2
@@ -21,44 +22,44 @@ from urllib.parse import urlparse
 PORT = int(os.environ.get('PORT', 8000))
 print(f"Starting server on port {PORT}")
 
+
+def ensure_database_url_loaded():
+    """Подставляет DATABASE_URL в os.environ из .env (admin/.env или корень репозитория)."""
+    if os.environ.get('DATABASE_URL'):
+        return
+    base = os.path.dirname(os.path.abspath(__file__))
+    candidates = [
+        os.path.join(base, '.env'),
+        os.path.join(base, '..', '.env'),
+        os.path.join(os.getcwd(), '.env'),
+        os.path.join(os.getcwd(), 'admin', '.env'),
+    ]
+    seen = set()
+    for path in candidates:
+        path = os.path.abspath(path)
+        if path in seen:
+            continue
+        seen.add(path)
+        if not os.path.isfile(path):
+            continue
+        try:
+            with open(path, 'r', encoding='utf-8') as f:
+                for line in f:
+                    line = line.strip()
+                    if line and not line.startswith('#') and 'DATABASE_URL' in line and '=' in line:
+                        val = line.split('=', 1)[1].strip().strip('"').strip("'")
+                        if val:
+                            os.environ['DATABASE_URL'] = val
+                            print(f"Loaded DATABASE_URL from {path}")
+                            return
+        except OSError as e:
+            print(f"Could not read {path}: {e}")
+
+
 def get_db_connection():
     """Получение подключения к PostgreSQL"""
-    # Пробуем получить из переменных окружения
+    ensure_database_url_loaded()
     database_url = os.environ.get('DATABASE_URL')
-    
-    # Если не найдена, пробуем прочитать из файла .env
-    if not database_url:
-        # Пробуем несколько возможных путей к .env файлу
-        possible_paths = [
-            os.path.join(os.path.dirname(__file__), '..', '.env'),  # Корень проекта
-            os.path.join(os.path.dirname(__file__), '.env'),  # В папке admin
-            os.path.join(os.getcwd(), '.env'),  # Текущая рабочая директория
-            '.env'  # Текущая директория
-        ]
-        
-        for env_file in possible_paths:
-            env_file = os.path.abspath(env_file)
-            print(f"Checking .env file at: {env_file}")
-            if os.path.exists(env_file):
-                print(f"Found .env file at: {env_file}")
-                try:
-                    with open(env_file, 'r', encoding='utf-8') as f:
-                        for line in f:
-                            line = line.strip()
-                            if line and not line.startswith('#') and 'DATABASE_URL' in line:
-                                if '=' in line:
-                                    database_url = line.split('=', 1)[1].strip().strip('"').strip("'")
-                                    print(f"Loaded DATABASE_URL from .env file")
-                                    break
-                except Exception as e:
-                    print(f"Error reading .env file: {e}")
-                if database_url:
-                    break
-    
-    # Если все еще не найдена, используем значение по умолчанию (для локальной разработки)
-    if not database_url:
-        database_url = "postgresql://postgres:tQ/5ShuHtg7FbgT@db.dxfnguweggcefslzgvzs.supabase.co:5432/postgres"
-        print("⚠️  DATABASE_URL не установлена, используется значение по умолчанию")
     
     # Проверяем, что database_url установлена
     if not database_url:
@@ -499,7 +500,8 @@ class WeddingHandler(http.server.SimpleHTTPRequestHandler):
                 pass
             raise
     
-    def init_database(self):
+    @staticmethod
+    def init_database():
         """Инициализация базы данных PostgreSQL"""
         try:
             conn = get_db_connection()
@@ -748,59 +750,50 @@ class WeddingHandler(http.server.SimpleHTTPRequestHandler):
         self.wfile.write('\ufeff'.encode('utf-8'))  # BOM для Excel
         self.wfile.write(csv_data.encode('utf-8'))
 
+class ThreadedTCPServer(socketserver.ThreadingMixIn, socketserver.TCPServer):
+    allow_reuse_address = True
+    daemon_threads = True
+
+
 def main():
     """Запуск сервера"""
     # Меняем рабочую директорию на родительскую (где лежит сайт)
     os.chdir(os.path.join(os.path.dirname(__file__), '..'))
-    
-    # Проверяем DATABASE_URL при старте
-    database_url = os.environ.get('DATABASE_URL')
-    if not database_url:
-        # Пробуем прочитать из .env
-        env_file = os.path.join(os.getcwd(), '.env')
-        if os.path.exists(env_file):
-            print(f"Reading DATABASE_URL from .env file: {env_file}")
-            try:
-                with open(env_file, 'r', encoding='utf-8') as f:
-                    for line in f:
-                        line = line.strip()
-                        if line and not line.startswith('#') and 'DATABASE_URL' in line and '=' in line:
-                            database_url = line.split('=', 1)[1].strip().strip('"').strip("'")
-                            os.environ['DATABASE_URL'] = database_url
-                            print("✅ DATABASE_URL loaded from .env file")
-                            break
-            except Exception as e:
-                print(f"Error reading .env: {e}")
-    
-    # Если все еще нет, устанавливаем по умолчанию
-    if not database_url:
-        database_url = "postgresql://postgres:tQ/5ShuHtg7FbgT@db.dxfnguweggcefslzgvzs.supabase.co:5432/postgres"
-        os.environ['DATABASE_URL'] = database_url
-        print("⚠️  Using default DATABASE_URL")
-    
-    # Инициализируем БД при старте
+
+    ensure_database_url_loaded()
+    if not os.environ.get('DATABASE_URL'):
+        print(
+            "Ошибка: не задан DATABASE_URL.\n"
+            "Создайте файл /opt/svadba/admin/.env (или .env в корне репозитория) со строкой:\n"
+            "DATABASE_URL=postgresql://...\n"
+            "Либо задайте переменную в systemd (EnvironmentFile уже указывает на admin/.env)."
+        )
+        sys.exit(1)
+
+    # Инициализируем БД при старте (без фейкового WeddingHandler — иначе падение на makefile)
     try:
-        handler = WeddingHandler(None, None, None)
-        handler.init_database()
-        print("✅ Database connection successful!")
+        WeddingHandler.init_database()
+        print("Database connection successful!")
     except Exception as e:
         print(f"WARNING: Database initialization failed: {e}")
         import traceback
         traceback.print_exc()
         print("Server will start anyway, but database operations may fail.")
-    
+
     Handler = WeddingHandler
-    
-    with socketserver.TCPServer(("", PORT), Handler) as httpd:
+    bind_host = os.environ.get("BIND_HOST", "0.0.0.0")
+
+    with ThreadedTCPServer((bind_host, PORT), Handler) as httpd:
         print("=" * 60)
         print(f"SERVER STARTED!")
         print(f"Port:        {PORT}")
+        print(f"Bind:        {bind_host}")
         print(f"Database:    PostgreSQL (Supabase)")
         print(f"Site:        http://localhost:{PORT}/index.html")
         print(f"Admin panel: http://localhost:{PORT}/admin/dashboard.html")
         print(f"Stop:        Ctrl+C")
         print("=" * 60)
-        
+
         try:
             httpd.serve_forever()
         except KeyboardInterrupt:
