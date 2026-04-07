@@ -2,7 +2,7 @@
 import csv
 import os
 import sys
-from datetime import datetime
+from datetime import datetime, timezone
 
 import psycopg2
 
@@ -11,11 +11,30 @@ def parse_dt(value: str):
     value = (value or "").strip()
     if not value:
         return None
-    # Handles values like "2026-03-30 14:46:52.820563+00"
-    try:
-        return datetime.fromisoformat(value.replace(" ", "T"))
-    except Exception:
-        return None
+    # Handles values like:
+    # - "2026-03-30 14:46:52.820563+00"
+    # - "2026-03-30 14:46:52+00"
+    # - "2026-03-30 14:46:52.820563+0000"
+    # - "2026-03-30 14:46:52+0000"
+    raw = value
+    if raw.endswith("+00"):
+        raw = raw + "00"  # +00 -> +0000 for strptime %z
+    fmts = (
+        "%Y-%m-%d %H:%M:%S.%f%z",
+        "%Y-%m-%d %H:%M:%S%z",
+        "%Y-%m-%d %H:%M:%S.%f",
+        "%Y-%m-%d %H:%M:%S",
+    )
+    for fmt in fmts:
+        try:
+            dt = datetime.strptime(raw, fmt)
+            # DB column is TIMESTAMP (without tz); store UTC-naive.
+            if dt.tzinfo is not None:
+                dt = dt.astimezone(timezone.utc).replace(tzinfo=None)
+            return dt
+        except Exception:
+            pass
+    return None
 
 
 def main():

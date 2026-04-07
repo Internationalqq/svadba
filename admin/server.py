@@ -600,7 +600,7 @@ class WeddingHandler(http.server.SimpleHTTPRequestHandler):
                 raise Exception("get_db_connection() вернул None вместо объекта подключения")
             cursor = conn.cursor(cursor_factory=RealDictCursor)
             cursor.execute("SET statement_timeout TO 8000")
-            cursor.execute('SELECT * FROM responses ORDER BY created_at DESC')
+            cursor.execute('SELECT * FROM responses ORDER BY created_at DESC NULLS LAST, id DESC')
             rows = cursor.fetchall()
             cursor.close()
             conn.close()
