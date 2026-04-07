@@ -432,9 +432,21 @@
             document.getElementById('stat-drink-none').textContent = drinksStats['Не пью алкоголь'];
         }
 
+        let isLoading = false;
+        let currentController = null;
+
         async function loadData() {
+            if (isLoading) {
+                return;
+            }
+            isLoading = true;
             try {
-                const responsesResponse = await fetch('/admin/api/responses');
+                currentController = new AbortController();
+                const timeoutId = setTimeout(() => currentController.abort(), 10000);
+                const responsesResponse = await fetch('/admin/api/responses', {
+                    signal: currentController.signal
+                });
+                clearTimeout(timeoutId);
 
                 if (!responsesResponse.ok) {
                     const errorText = await responsesResponse.text();
@@ -520,6 +532,9 @@
                 console.error('Error loading data:', error);
                 let errorMessage = error.message || 'Неизвестная ошибка';
 
+                if (error.name === 'AbortError') {
+                    errorMessage = 'Сервер отвечает слишком долго (более 10 секунд). Попробуйте снова.';
+                }
                 if (error.message && error.message.includes('Failed to fetch')) {
                     errorMessage = 'Не удалось подключиться к серверу. Убедитесь, что сервер запущен и доступен.';
                 }
@@ -536,6 +551,9 @@
                         </details>
                     </div>
                 `;
+            } finally {
+                isLoading = false;
+                currentController = null;
             }
         }
 
