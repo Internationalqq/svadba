@@ -772,15 +772,10 @@ def main():
         )
         sys.exit(1)
 
-    # Инициализируем БД при старте (без фейкового WeddingHandler — иначе падение на makefile)
-    try:
-        WeddingHandler.init_database()
-        print("Database connection successful!")
-    except Exception as e:
-        print(f"WARNING: Database initialization failed: {e}")
-        import traceback
-        traceback.print_exc()
-        print("Server will start anyway, but database operations may fail.")
+    # Важно: не блокируем старт сервера проверкой БД.
+    # Раньше при нестабильном Supabase процесс зависал/падал до bind(:8000),
+    # из-за чего nginx видел 502/504. Проверка БД выполняется в обработчиках запросов.
+    print("Skipping DB init on startup (non-blocking boot mode).")
 
     Handler = WeddingHandler
     bind_host = os.environ.get("BIND_HOST", "0.0.0.0")
